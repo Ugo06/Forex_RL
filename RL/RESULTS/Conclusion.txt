@@ -1,0 +1,35 @@
+Rapport de Projet : Prédiction du EUR/USD à l'aide d'Indicateurs Macroéconomiques
+Introduction
+Dans ce projet, nous explorons la possibilité de prédire le taux de change EUR/USD en utilisant des indicateurs macroéconomiques de la zone euro et des États-Unis. Nous partons du postulat que la valeur de l'EUR/USD est une somme pondérée de ces indicateurs macroéconomiques. Le but est de créer un modèle capable de prévoir les variations du taux de change et d'optimiser les stratégies de trading grâce à un algorithme d'apprentissage par renforcement.
+
+Méthodologie
+Constitution du Dataset
+Nous avons constitué un dataset comprenant le prix de l'EUR/USD et 25 indicateurs macroéconomiques. Les indicateurs incluent des mesures telles que le PIB, les taux d'intérêt, le taux d'inflation, le taux de chômage, la balance commerciale, l'indice de confiance des consommateurs, et plusieurs indices PMI (manufacturier et services) parmi d'autres.
+
+Analyse de Corrélation
+Pour comprendre les relations entre les indicateurs et le taux de change, nous avons tracé une matrice de corrélation. Cependant, les coefficients de corrélation obtenus étaient faibles, suggérant des relations linéaires faibles ou inexistantes entre les variables.
+
+Algorithme de Renforcement
+Nous avons implémenté un algorithme de renforcement pour permettre à un agent de trader le taux de change EUR/USD en se basant sur les indicateurs macroéconomiques. Pour tester l'efficacité de notre algorithme, nous avons créé un marché fictif avec des données synthétiques où le prix de l'EUR/USD était une somme pondérée aléatoire des indicateurs variant dans une fourchette de -3 à 3.
+
+Environnement de Trading Synthétique
+Dans cet environnement synthétique, l'algorithme a montré une performance prometteuse avec un taux de réussite de 80%. Cela nous a donné confiance dans notre approche et nous avons décidé de tester l'algorithme sur des données réelles du marché.
+
+Résultats
+Données Synthétiques
+L'algorithme a bien performé sur les données synthétiques, validant notre hypothèse de base. Il a appris à trader avec une efficacité notable, atteignant un taux de réussite de 80%.
+
+Données Réelles
+Cependant, lorsque nous avons appliqué notre modèle aux données réelles du marché, les résultats n'ont pas été fructueux. Les performances étaient bien en deçà de nos attentes, avec une faible capacité de prédiction du taux de change EUR/USD.
+
+Discussion
+Les résultats décevants obtenus avec les données réelles peuvent être attribués à plusieurs facteurs :
+
+Complexité des Marchés Financiers : Les marchés financiers réels sont influencés par une multitude de facteurs, souvent imprévisibles et non capturés par les indicateurs macroéconomiques seuls.
+Faible Corrélation : Les faibles coefficients de corrélation entre les indicateurs et le taux de change suggèrent que d'autres variables non incluses dans notre modèle jouent un rôle significatif.
+Modélisation Linéaire : La relation entre les indicateurs macroéconomiques et le taux de change peut être non linéaire, nécessitant des modèles plus complexes pour capturer ces dynamiques.
+Conclusion
+Ce projet a permis de développer et de tester un algorithme de renforcement pour le trading de l'EUR/USD basé sur des indicateurs macroéconomiques. Bien que les résultats sur les données synthétiques aient été prometteurs, les performances sur les données réelles n'ont pas été satisfaisantes. Pour améliorer la précision de nos prédictions, il serait nécessaire d'explorer des modèles plus sophistiqués et d'intégrer un ensemble de variables plus large.
+
+Nous espérons que cette approche pourra servir de base pour des travaux futurs et inspirer d'autres chercheurs et praticiens dans le domaine de la prédiction des taux de change et de l'optimisation des stratégies de trading.
+
