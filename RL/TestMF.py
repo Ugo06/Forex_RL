@@ -13,13 +13,13 @@ from tensorflow.keras.models import load_model
 
 """%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TEST %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"""
 
-dataset = pd.read_excel('C:/Users/Ugo/Documents/AI/Quant_ML/DATA/DATASET.xlsx',sheet_name='TEST',index_col=None)
-dataset = dataset[5000:]
-dataset=dataset.drop(['real_date'], axis=1)
-plt.plot(dataset['PRICE'])
-plt.show()
+dataset = pd.read_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TRAIN.csv',index_col=None)
+dataset= dataset[:250]
+#dataset=dataset.drop(['real_date'], axis=1)
+#plt.plot(dataset['PRICE'])
+#plt.show()
 
-prix = dataset['PRICE'].to_numpy()
+prix = dataset.to_numpy()[:,0]
 PD = PrepareData(dataset)
 data = PD.data_for_test()
 
@@ -27,7 +27,7 @@ data = PD.data_for_test()
 env = TradingEnvI(data,window_size=20)
 env.reset()
 agent = DQNTrader(state_size=env.state_size, action_size=env.action_size)
-model = load_model('C:/Users/Ugo/Documents/AI/Quant_ML/RL/MODEL/model_REAL_DATA.keras')
+model = load_model('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA_1.keras')
 agent.model = model
 agent.epsilon = 0
 

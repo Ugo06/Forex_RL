@@ -9,21 +9,13 @@ import numpy as np
 
 
 """%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TRAINING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"""
-
-dataset = pd.read_excel('C:/Users/Ugo/Documents/AI/Quant_ML/DATA/test.csv',index_col=0)
-dataset = dataset[:1000]
-dataset=dataset.drop(['label','OPEN','Q_returns','1/2M_returns','M_returns','W_returns','D_returns'], axis=1)
-
-plt.plot(dataset['PRICE'])
-plt.show()
+dataset = pd.read_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TRAIN.csv')
 
 PD = PrepareData(dataset)
-DATA = PD.data_for_training()
-
+DATA = PD.data_for_training(size=250)
 print(len(DATA))
-#pd.DataFrame(PD.norm_data).to_excel('C:/Users/Ugo/Documents/AI/FinRL/DATA/REAL_DATA/norm_data.xlsx',index=False)
-
 env = TradingEnvI(DATA[0],window_size=20)
+
 env.reset()
 agent = DQNTrader(state_size=env.state_size, action_size=env.action_size,lstm_layer=[16,8])
 
@@ -72,8 +64,8 @@ for episode in range(1,episodes+1):
                 #plt.plot(Score,color='b')
                 #plt.show()
             if episode%25 == 0 :
-                agent.target_model.save('C:/Users/Ugo/Documents/AI/Quant_ML/RL/MODEL/model_REAL_DATA.keras')
-                np.save('C:/Users/Ugo/Documents/AI/Quant_ML/RL/RESULTS/Score_REAL_DATA.npy', Score)
+                agent.target_model.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA_1.keras')
+                np.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/RESULTS/Score_FAKE_DATA.npy', Score)
                 print('saves done')
             break
 
@@ -84,8 +76,8 @@ for episode in range(1,episodes+1):
     total_reward += reward
     Score.append(total_reward)
 
-agent.target_model.save('C:/Users/Ugo/Documents/AI/Quant_ML/RL/MODEL/model_REAL_DATA.keras')
-np.save('C:/Users/Ugo/Documents/AI/Quant_ML/RL/RESULTS/Score_REAL_DATA.npy', Score)
+agent.target_model.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA_1.keras')
+np.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/RESULTS/Score_FAKE_DATA.npy', Score)
 print('saves done')
 
 Score = np.array(Score)

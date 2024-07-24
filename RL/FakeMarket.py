@@ -94,8 +94,8 @@ class StockMarket(News) :
         test = DATASET_FAKE_MARKET[(size//4)*3:]
         training = pd.DataFrame(training, columns=self.labels)
         test = pd.DataFrame(test, columns=self.labels)
-        training.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/DATA/FAKE_DATA_TRAIN.csv',index=False)
-        test.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/DATA/FAKE_DATA_TEST.csv',index=False)
+        training.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TRAIN.csv',index=False)
+        test.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TEST.csv',index=False)
 
         Noise_Price = np.array(self.n_price_history)
         Noise_Price = np.reshape(Noise_Price,(size,1))
@@ -104,10 +104,10 @@ class StockMarket(News) :
         n_test = N_DATASET_FAKE_MARKET[(size//4)*3:]
         n_training = pd.DataFrame(n_training, columns=self.labels)
         n_test = pd.DataFrame(n_test, columns=self.labels)
-        n_training.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/DATA/NOISY_FAKE_DATA_TRAIN.csv',index=False)
-        n_test.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/DATA/NOISY_TEST_FAKE_DATA_TEST.csv',index=False)
+        n_training.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/NOISY_FAKE_DATA_TRAIN.csv',index=False)
+        n_test.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/NOISY_TEST_FAKE_DATA_TEST.csv',index=False)
 
-size = 5000
+size = 40000
 
 SM = StockMarket(5)
 SM.generate(size)
