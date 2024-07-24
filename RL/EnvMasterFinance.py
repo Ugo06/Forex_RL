@@ -2,7 +2,7 @@ from Tools import Order
 import numpy as np
 from math import log
 
-class TradingEnvI(Order):
+class TradingEnvIAR(Order):
     def __init__(self, data, window_size=20):
         self.window_size = window_size
         self.data = data
@@ -33,9 +33,10 @@ class TradingEnvI(Order):
         self.position = 0
         self.historic_position = np.zeros((self.initial_step,1))
         self.historic_action = np.full((self.initial_step,1),0)
+        self.historic_wallet = np.full((self.initial_step,1),0)
 
         state = self.data[:self.initial_step].copy()
-        #state = np.concatenate((state,self.historic_position,self.historic_action),axis = 1)
+        state = np.concatenate((state,self.historic_action,self.historic_wallet),axis = 1)
         self.state_size = np.shape(state[:,1:])
 
         return state[:,1:]
@@ -92,31 +93,38 @@ class TradingEnvI(Order):
             self.reward = 0
 
         self.current_step += 1
-        
+        reward = self.calculate_reward(action)
+        self.wallet = reward
         #self.historic_position = np.concatenate((self.historic_position, np.array([[self.position]])),axis = 0)
-        #self.historic_action = np.concatenate((self.historic_action, np.array([[action]])),axis = 0)
+        self.historic_wallet= np.concatenate((self.historic_wallet, np.array([[self.wallet]])),axis = 0)
+        self.historic_action = np.concatenate((self.historic_action, np.array([[action]])),axis = 0)
         
         E = self.data[self.current_step-self.initial_step:self.current_step].copy()
         #U = self.historic_position[self.current_step-self.initial_step:].copy()
-        #I = self.historic_action[self.current_step-self.initial_step:].copy()
+        I = self.historic_action[self.current_step-self.initial_step:].copy()
+        R = self.historic_wallet[self.current_step-self.initial_step:].copy()
 
         #print(np.shape(E),np.shape(U),np.shape(I))
 
-        next_state = E #np.concatenate((E,U,I) , axis = 1)
-
-        reward = self.calculate_reward(action)
+        next_state = np.concatenate((E,I,R) , axis = 1)
 
         if self.current_step >= self.max_steps :
             self.done = True
             if len(self.orders) != 0 and self.orders[-1].end_date == 0 :
                 self.orders[-1].close_order(self.current_step)
                 self.position = 0
+                reward = self.calculate_reward(action)
         return next_state[:,1:], reward, self.done, action,{}
 
     def calculate_reward(self,action):
         if len(self.orders)==0:
             return 0
-        current_price = self.data[self.current_step][0]
-        opening_price = self.data[self.orders[-1].start_date][0]
-  
-        return self.position*log(current_price/opening_price)
+        else:
+           s = 0
+           for order in self.orders:
+              if order.end_date==0:
+                 s += 0
+              else:
+                 s += order.order_type*(self.data[order.end_date][0]-self.data[order.start_date][0])
+           reward=s
+           return reward
