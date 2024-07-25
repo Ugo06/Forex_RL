@@ -10,26 +10,22 @@ import numpy as np
 
 """%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TRAINING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"""
 dataset = pd.read_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TRAIN.csv')
-
-PD = PrepareData(dataset)
-DATA = PD.data_for_training(size=80)
-print(len(DATA))
-env = TradingEnvIAR(DATA[0],window_size=20)
-
-env.reset()
-agent = DQNTrader(state_size=env.state_size, action_size=env.action_size,lstm_layer=[16,8])
-
-episodes = 100
-if len(DATA)<episodes:
-    raise ValueError("Le nombre de sample n'est pas suffisant DATA:{}".format(len(DATA)))
+dataset = dataset[:].to_numpy()
+window_size = 21
+episode_size = 84
+episodes = 1000
 batch_size = 16
+
+env = TradingEnvIAR(data=dataset,window_size=window_size,episode_size=episode_size)
+env.reset()
+
+agent = DQNTrader(state_size=env.state_size, action_size=env.action_size,lstm_layer=[16,8],epsilon_decay=0.1**(1/750))
+
+
 Score = []
-bar_progress = tqdm(range(episodes*(len(DATA[0])-20)))
+bar_progress = tqdm(range(episodes*episode_size))
 
 for episode in range(1,episodes+1):
-    
-    data = DATA[episode-1]
-    env = TradingEnvIAR(data,window_size=20)
     state = env.reset()
     #state = agent.normalize(state)
     #state = np.expand_dims(state, axis=-1)
@@ -37,7 +33,7 @@ for episode in range(1,episodes+1):
 
     done = env.done
     total_reward = 0
-
+    i = 0
     while not done:
 
         action = agent.act(state)
@@ -49,12 +45,13 @@ for episode in range(1,episodes+1):
         next_state = np.array([next_state])
         agent.remember(state, action, reward, next_state, done)
         state = next_state
+        
         # print("wallet",env.wallet)
         # print("reward",reward)
-        total_reward = reward
+        total_reward += reward
         bar_progress.update(1)
         
-
+        i+=1
         if done:
             if agent.epsilon > agent.epsilon_min:
                 agent.epsilon *= agent.epsilon_decay
@@ -65,8 +62,8 @@ for episode in range(1,episodes+1):
                 #plt.plot(Score,color='b')
                 #plt.show()
             if episode%25 == 0 :
-                agent.target_model.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA_RW.keras')
-                np.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/RESULTS/Score_FAKE_DATA_RW.npy', Score)
+                agent.target_model.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA.keras')
+                np.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/RESULTS/Score_FAKE_DATA.npy', Score)
                 print('saves done')
             break
 
@@ -74,11 +71,11 @@ for episode in range(1,episodes+1):
             agent.replay(batch_size)
     
     
-    total_reward = reward
+    total_reward += reward
     Score.append(total_reward)
 
-agent.target_model.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA_RW.keras')
-np.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/RESULTS/Score_FAKE_DATA_RW.npy', Score)
+agent.target_model.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA.keras')
+np.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/RESULTS/Score_FAKE_DATA.npy', Score)
 print('saves done')
 
 Score = np.array(Score)
