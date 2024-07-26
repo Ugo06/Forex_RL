@@ -1,5 +1,5 @@
 from AgentMasterFinance import DQNTrader
-from EnvMasterFinance import TradingEnvI
+from EnvMasterFinance import TradingEnvIAR
 from Tools import PrepareData
 
 import pandas as pd
@@ -13,8 +13,8 @@ from tensorflow.keras.models import load_model
 
 """%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TEST %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"""
 
-dataset = pd.read_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TRAIN.csv',index_col=None)
-dataset= dataset[:250]
+dataset = pd.read_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TEST.csv',index_col=None)
+dataset= dataset[:]
 #dataset=dataset.drop(['real_date'], axis=1)
 #plt.plot(dataset['PRICE'])
 #plt.show()
@@ -24,10 +24,10 @@ PD = PrepareData(dataset)
 data = PD.data_for_test()
 
 
-env = TradingEnvI(data,window_size=20)
+env = TradingEnvIAR(data,window_size=21,episode_size=252)
 env.reset()
 agent = DQNTrader(state_size=env.state_size, action_size=env.action_size)
-model = load_model('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA_1.keras')
+model = load_model('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA_RW.keras')
 agent.model = model
 agent.epsilon = 0
 

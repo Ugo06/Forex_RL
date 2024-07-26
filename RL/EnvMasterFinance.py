@@ -4,15 +4,16 @@ from math import log
 import random as rd
 
 class TradingEnvIAR(Order):
-    def __init__(self, data, window_size=20,episode_size=250):
+    def __init__(self, data, window_size=20,episode_size=250,n=1):
+        self.n = n
         self.episode_size = episode_size
         self.window_size = window_size
         self.data = data
         self.action_size = 3
         #self.max_steps = np.shape(data)[0] - 1
 
-        self.initial_step = rd.randint(self.window_size,len(self.data)-(self.episode_size+1))
-        self.state_size = (self.window_size,np.shape(data[:,1:])[1])
+        self.initial_step = rd.randint(self.window_size,len(self.data)-(self.n*self.episode_size+1))
+        self.state_size = (self.window_size,np.shape(data)[1])
         self.current_step = self.initial_step
         self.position = 0
         self.historic_position = np.zeros((self.window_size,1))
@@ -21,28 +22,29 @@ class TradingEnvIAR(Order):
 
         self.historic_action = np.full((self.window_size,1),0)
         self.wallet = 0
-        self.reward = 0
 
 
-    def reset(self):
-        self.initial_step = rd.randint(self.window_size,len(self.data)-(self.episode_size+1))
+    def reset(self,initial_step:int=-1):
+        if initial_step <0:
+           self.initial_step = rd.randint(self.window_size,len(self.data)-(self.n*self.episode_size+1))
+        else:
+           self.initial_step=initial_step
         self.current_step = self.initial_step
         self.done = False
 
         self.wallet = 0
-        self.reward = 0
-
         self.orders = []
         self.position = 0
+        
         self.historic_position = np.zeros((self.window_size,1))
         self.historic_action = np.full((self.window_size,1),0)
-        self.historic_wallet = np.full((self.window_size,1),0)
+        self.historic_wallet = np.full((self.window_size,1),self.wallet)
 
         state = self.data[self.initial_step-self.window_size:self.initial_step].copy()
-        #state = np.concatenate((state,self.historic_action,self.historic_wallet),axis = 1)
-        self.state_size = np.shape(state[:,1:])
+        #state = np.concatenate((state,self.historic_wallet),axis = 1)
+        self.state_size = np.shape(state)
 
-        return state[:,1:]
+        return state
 
     def hold(self):
         pass
@@ -55,12 +57,10 @@ class TradingEnvIAR(Order):
 
         if self.position == 0:
           if action == 0:
-            self.reward = 0
             self.orders.append(Order())
             self.orders[-1].place_order(self.current_step, 1)
             self.position = self.orders[-1].order_type
           elif action == 1:
-            self.reward = 0
             self.orders.append(Order())
             self.orders[-1].place_order(self.current_step, -1)
             self.position = self.orders[-1].order_type
@@ -73,13 +73,11 @@ class TradingEnvIAR(Order):
           elif action == 1:
             self.orders[-1].close_order(self.current_step)
             self.orders.append(Order())
-            self.reward = 0
             self.orders[-1].place_order(self.current_step, -1)
             self.position = self.orders[-1].order_type
           else :
             self.orders[-1].close_order(self.current_step)
             self.position = 0
-            self.reward = 0
 
         if self.position == -1:
           if action == 1:
@@ -93,13 +91,19 @@ class TradingEnvIAR(Order):
           else :
             self.orders[-1].close_order(self.current_step)
             self.position = 0
-            self.reward = 0
 
         self.current_step += 1
-        reward = self.calculate_reward()
-        self.wallet += reward
+        
+        current_price = self.data[self.current_step][0]
+        previous_price = self.data[self.current_step-1][0]
+        if self.position*(current_price-previous_price)>0:
+           self.wallet += 1
+        elif self.position*(current_price-previous_price)<0:
+           self.wallet -=1
+        else:
+           self.wallet+=0
         #self.historic_position = np.concatenate((self.historic_position, np.array([[self.position]])),axis = 0)
-        #self.historic_wallet= np.concatenate((self.historic_wallet, np.array([[self.wallet]])),axis = 0)
+        self.historic_wallet= np.concatenate((self.historic_wallet, np.array([[self.wallet]])),axis = 0)
         #self.historic_action = np.concatenate((self.historic_action, np.array([[action]])),axis = 0)
         
         E = self.data[self.current_step-self.window_size:self.current_step].copy()
@@ -110,18 +114,16 @@ class TradingEnvIAR(Order):
         #print(np.shape(E),np.shape(U),np.shape(I))
 
         next_state = E #np.concatenate((E,I,R) , axis = 1)
+        reward = self.calculate_reward()
+
         if self.current_step-self.initial_step >= self.episode_size :
             self.done = True
             if len(self.orders) != 0 and self.orders[-1].end_date == 0 :
                 self.orders[-1].close_order(self.current_step)
                 self.position = 0
-                reward = self.calculate_reward()
-        return next_state[:,1:], reward, self.done, action,{}
-
+        return next_state, reward, self.done, action,{}
     def calculate_reward(self):
-        if len(self.orders)==0:
-            return 0
-        else:
-           opening_price = self.data[self.orders[-1].start_date][0]
-           current_price = self.data[self.current_step][0]
-           return self.position*(current_price-opening_price)
+       return self.historic_wallet[-1][0]-self.historic_wallet[-2][0]
+
+
+        

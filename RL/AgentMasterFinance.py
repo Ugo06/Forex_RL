@@ -9,7 +9,7 @@ from tensorflow.keras.optimizers import Adam
 
 
 class DQNTrader:
-    def __init__(self, state_size, action_size, lstm_layer = [128,16],buffer_size=15000, gamma = 0.995, espilon= 1, epsilon_decay = 0.95, epsilon_min = 0.01):
+    def __init__(self, state_size, action_size, lstm_layer = [128,16],buffer_size=40000, gamma = 0.995, espilon= 1, epsilon_decay = 0.95, epsilon_min = 0.01):
         self.state_size = state_size
         self.action_size = action_size
 
@@ -31,9 +31,9 @@ class DQNTrader:
 
         lstm_layer_1 = LSTM(lstm_layer[0], return_sequences=True, stateful=False)(input_state)
         lstm_layer_2 = LSTM(lstm_layer[1], return_sequences=False, stateful=False)(lstm_layer_1)
-        dense_layer1 = Dense(32, activation='relu')(lstm_layer_2)
+        dense_layer1 = Dense(32, activation='elu')(lstm_layer_2)
         dropout_layer1 = Dropout(0.5)(dense_layer1)
-        dense_layer2 = Dense(16, activation='relu')(dropout_layer1)
+        dense_layer2 = Dense(16, activation='elu')(dropout_layer1)
         dropout_layer2 = Dropout(0.5)(dense_layer2)
         output_q_values = Dense(self.action_size, activation='linear')(dropout_layer2)
 
