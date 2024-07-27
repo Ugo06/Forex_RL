@@ -32,19 +32,6 @@ class TradingEnvIAR(Order):
         self.position = 0
         
         self.wallet = 0
-        
-
-    def _calculate_state_size(self):
-        state_columns = 0
-        if self.mode['include_price']:
-            state_columns += 1
-        if self.mode['include_historic_position']:
-            state_columns += 1
-        if self.mode['include_historic_action']:
-            state_columns += 1
-        if self.mode['include_historic_wallet']:
-            state_columns += 1
-        return (self.window_size, state_columns + np.shape(self.data[:, 1:])[1])
 
     def reset(self, initial_step: int = -1):
         self.initial_step = rd.randint(self.window_size, len(self.data) - (self.n * self.episode_size + 1)) if initial_step < 0 else initial_step
@@ -135,9 +122,20 @@ class TradingEnvIAR(Order):
         self.historic_position = np.concatenate((self.historic_position, np.array([[position]])), axis=0)
         self.historic_action = np.concatenate((self.historic_action, np.array([[action]])), axis=0)
 
-
     def calculate_reward(self):
         return self.historic_wallet[-1][0] - self.historic_wallet[-2][0]
+    
+    def _calculate_state_size(self):
+        state_columns = 0
+        if self.mode['include_price']:
+            state_columns += 1
+        if self.mode['include_historic_position']:
+            state_columns += 1
+        if self.mode['include_historic_action']:
+            state_columns += 1
+        if self.mode['include_historic_wallet']:
+            state_columns += 1
+        return (self.window_size, state_columns + np.shape(self.data[:, 1:])[1])
 
     def _get_state(self):
         data_state = self.data[self.current_step - self.window_size:self.current_step, 1:].copy()
