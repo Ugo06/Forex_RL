@@ -13,7 +13,7 @@ class TradingEnvIAR(Order):
         #self.max_steps = np.shape(data)[0] - 1
 
         self.initial_step = rd.randint(self.window_size,len(self.data)-(self.n*self.episode_size+1))
-        self.state_size = (self.window_size,np.shape(data)[1])
+        self.state_size = (self.window_size,np.shape(data[:,1:])[1])
         self.current_step = self.initial_step
         self.position = 0
         self.historic_position = np.zeros((self.window_size,1))
@@ -42,9 +42,9 @@ class TradingEnvIAR(Order):
 
         state = self.data[self.initial_step-self.window_size:self.initial_step].copy()
         #state = np.concatenate((state,self.historic_wallet),axis = 1)
-        self.state_size = np.shape(state)
+        self.state_size = np.shape(state[:,1:])
 
-        return state
+        return state[:,1:]
 
     def hold(self):
         pass
@@ -96,12 +96,7 @@ class TradingEnvIAR(Order):
         
         current_price = self.data[self.current_step][0]
         previous_price = self.data[self.current_step-1][0]
-        if self.position*(current_price-previous_price)>0:
-           self.wallet += 1
-        elif self.position*(current_price-previous_price)<0:
-           self.wallet -=1
-        else:
-           self.wallet+=0
+        self.wallet += self.position*(current_price-previous_price)/(0.001*np.shape(self.data[:,1:])[1])
         #self.historic_position = np.concatenate((self.historic_position, np.array([[self.position]])),axis = 0)
         self.historic_wallet= np.concatenate((self.historic_wallet, np.array([[self.wallet]])),axis = 0)
         #self.historic_action = np.concatenate((self.historic_action, np.array([[action]])),axis = 0)
@@ -121,7 +116,7 @@ class TradingEnvIAR(Order):
             if len(self.orders) != 0 and self.orders[-1].end_date == 0 :
                 self.orders[-1].close_order(self.current_step)
                 self.position = 0
-        return next_state, reward, self.done, action,{}
+        return next_state[:,1:], reward, self.done, action,{}
     def calculate_reward(self):
        return self.historic_wallet[-1][0]-self.historic_wallet[-2][0]
 

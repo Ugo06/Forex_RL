@@ -9,7 +9,7 @@ import numpy as np
 
 
 """%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TRAINING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"""
-dataset = pd.read_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/NOISY_FAKE_DATA_TRAIN.csv')
+dataset = pd.read_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TRAIN.csv')
 dataset = dataset.copy().to_numpy()
 window_size = 21
 episode_size = 84
@@ -57,7 +57,7 @@ for episode in range(1,episodes+1):
                 #plt.plot(Score,color='b')
                 #plt.show()
             
-            if episode%5==0:
+            if episode%1==0:
                 state_test=env_test.reset(env.current_step)
                 state_test = np.array([state_test])
                 done_test = False
