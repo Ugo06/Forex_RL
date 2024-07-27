@@ -13,7 +13,7 @@ dataset = pd.read_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TRAI
 dataset = dataset.copy().to_numpy()
 window_size = 21
 episode_size = 84
-episodes = 500
+episodes = 250
 batch_size = 16
 
 
@@ -71,8 +71,8 @@ for episode in range(1,episodes+1):
 
            
             if episode%25 == 0 :
-                agent.target_model.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA_RW.keras')
-                np.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/RESULTS/Score_FAKE_DATA_RW.npy', Score)
+                agent.target_model.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/MODEL/model_FAKE_DATA_RW_spread.keras')
+                np.save('C:/Users/Ugo/Documents/AI/Forex_ML/RL/RESULTS/Score_FAKE_DATA_RW_spread.npy', Score)
             
             print("Épisode :", episode,"Récompense totale :", env.wallet)
             print("nombre de position ouverte: ",len(env.historic_order(env.orders)))

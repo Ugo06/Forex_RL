@@ -96,7 +96,7 @@ class TradingEnvIAR(Order):
         
         current_price = self.data[self.current_step][0]
         previous_price = self.data[self.current_step-1][0]
-        self.wallet += self.position*(current_price-previous_price)/(0.001*np.shape(self.data[:,1:])[1])
+        self.wallet += self.position*(current_price-previous_price)/0.001
         #self.historic_position = np.concatenate((self.historic_position, np.array([[self.position]])),axis = 0)
         self.historic_wallet= np.concatenate((self.historic_wallet, np.array([[self.wallet]])),axis = 0)
         #self.historic_action = np.concatenate((self.historic_action, np.array([[action]])),axis = 0)
