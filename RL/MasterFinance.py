@@ -1,5 +1,5 @@
 from AgentMasterFinance import DQNTrader
-from EnvMasterFinance import TradingEnvIAR
+from EnvMasterFinance import TradingEnv
 from Tools import PrepareData
 
 import pandas as pd
@@ -13,8 +13,8 @@ dataset_path = DATA_PATH
 dataset = pd.read_csv(dataset_path).to_numpy()
 
 # Initialize environments
-env = TradingEnvIAR(data=dataset, window_size=WINDOW_SIZE, episode_size=EPISODE_SIZE, n=N_TRAIN)
-env_test = TradingEnvIAR(data=dataset, window_size=WINDOW_SIZE, episode_size=EPISODE_SIZE, n=N_TEST)
+env = TradingEnv(data=dataset, window_size=WINDOW_SIZE, episode_size=EPISODE_SIZE, n=N_TRAIN,mode=MODE)
+env_test = TradingEnv(data=dataset, window_size=WINDOW_SIZE, episode_size=EPISODE_SIZE, n=N_TEST,mode=MODE)
 env.reset()
 
 # Initialize agent

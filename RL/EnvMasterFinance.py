@@ -2,7 +2,7 @@ import numpy as np
 import random as rd
 from Tools import Order
 
-class TradingEnvIAR(Order):
+class TradingEnv(Order):
     def __init__(self, data: np.array, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: int = -1, mode: dict = None):
         
         self.data = data
