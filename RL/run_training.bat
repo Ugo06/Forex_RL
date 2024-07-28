@@ -30,6 +30,7 @@ python -m RL.config ^
   --include_historic_position False ^
   --include_historic_action False ^
   --include_historic_wallet False ^
+  --wallet 0 ^
   --reward_function "default" ^
   --lstm_layer 16 8 ^
   --epsilon 1 ^

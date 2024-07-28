@@ -1,9 +1,11 @@
 import numpy as np
 import random as rd
+
+from math import log
 from utils.tools import Order
 
 class TradingEnv(Order):
-    def __init__(self, data: np.array, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: None = 'random', mode: dict = None, reward_function: str = "default"):
+    def __init__(self, data: np.array, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: None = 'random', mode: dict = None,wallet:int=0, reward_function: str = "default"):
         
         self.data = data
 
@@ -38,7 +40,7 @@ class TradingEnv(Order):
       
         self.orders = []
         self.position = 0
-        self.wallet = 0
+        self.wallet = wallet
 
         self.historic_position = np.zeros((self.window_size, 1))
         self.historic_action = np.full((self.window_size, 1), 0)
@@ -99,6 +101,7 @@ class TradingEnv(Order):
 
         next_state = self._get_state()
         reward = self.reward_function()
+        print(reward)
 
         if self.current_step - self.initial_step >= self.episode_size:
             self.done = True
@@ -148,20 +151,40 @@ class TradingEnv(Order):
         current_price = self.data[self.current_step][0]
         previous_price = self.data[self.current_step - 1][0]
         self.wallet += self.position * (current_price - previous_price) / 0.001
+        self.historic_wallet = np.concatenate((self.historic_wallet, np.array([[self.wallet]])), axis=0)
         self.historic_position = np.concatenate((self.historic_position, np.array([[position]])), axis=0)
         self.historic_action = np.concatenate((self.historic_action, np.array([[action]])), axis=0)
 
     def _get_reward_function(self,reward_function:str):
         if type(reward_function) == str:
             if reward_function == 'default':
-                return self.calculate_reward
+                return self.default_reward
+            elif reward_function == 'portfolio':
+                return self.reward_on_PF
+            elif reward_function == 'log_portfolio':
+                return self.log_reward_on_PF
             else:
                 raise ValueError(f"reward function:{reward_function} doesn't exist.")
         else:
             return reward_function
     
-    def calculate_reward(self):
+    def default_reward(self):
+        if self.historic_wallet[-1][0] - self.historic_wallet[-2][0] > 0:
+            return 1
+        elif self.historic_wallet[-1][0] - self.historic_wallet[-2][0]<0:
+            return -1
+        else:
+            return 0
+    
+    def reward_on_PF(self):
         return self.historic_wallet[-1][0] - self.historic_wallet[-2][0]
+    
+    def log_reward_on_PF(self):
+        if self.historic_wallet[-1][0]<=0:
+            self.done=True
+            return 0
+        return log(self.historic_wallet[-1][0]/self.historic_wallet[-2][0])
+    
     
     def _calculate_state_size(self):
         state_columns = 0
