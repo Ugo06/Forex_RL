@@ -3,7 +3,7 @@ import random as rd
 from utils.tools import Order
 
 class TradingEnv(Order):
-    def __init__(self, data: np.array, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: int = -1, mode: dict = None):
+    def __init__(self, data: np.array, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: None = 'random', mode: dict = None, reward_function: str = "default"):
         
         self.data = data
 
@@ -11,6 +11,7 @@ class TradingEnv(Order):
         self.episode_size = episode_size
         self.window_size = window_size
         self.action_size = 3
+        self.reward_function = self._get_reward_function(reward_function=reward_function)
 
         self.mode = mode if mode is not None else {
             'include_price': False,
@@ -19,7 +20,19 @@ class TradingEnv(Order):
             'include_historic_wallet': False
         }
 
-        self.initial_step = rd.randint(self.window_size, len(self.data) - (self.n * self.episode_size + 1)) if initial_step < 0 else initial_step
+        if type(initial_step) ==str:
+            if initial_step == 'random':
+                self.initial_step = rd.randint(self.window_size, len(self.data) - (self.n * self.episode_size + 1))
+            elif initial_step == 'sequential':
+                self.initial_step = self.window_size
+        elif type(initial_step) == int:
+            if initial_step>= self.window_size and initial_step<=len(self.data) - (self.n * self.episode_size + 1):
+                self.initial_step = initial_step
+            else:
+                raise ValueError(f"The initial step has to be in [{self.window_size},{initial_step<=len(self.data) - (self.n * self.episode_size + 1)}]")
+        else:
+            raise ValueError("The initial step has to be a string or an integers")
+        
         self.current_step = self.initial_step
         self.state_size = self._calculate_state_size()
       
@@ -33,8 +46,24 @@ class TradingEnv(Order):
 
         self.done = False
 
-    def reset(self, initial_step: int = -1):
-        self.initial_step = rd.randint(self.window_size, len(self.data) - (self.n * self.episode_size + 1)) if initial_step < 0 else initial_step
+    def reset(self, initial_step: None = 'random'):
+        
+        if type(initial_step) ==str:
+            if initial_step == 'random':
+                self.initial_step = rd.randint(self.window_size, len(self.data) - (self.n * self.episode_size + 1))
+            elif initial_step == 'sequential':
+                if self.initial_step<=len(self.data) - (self.n * self.episode_size + 1):
+                    self.initial_step += self.window_size
+                else:
+                    self.initial_step = self.window_size
+        elif type(initial_step) == int:
+            if initial_step>= self.window_size and initial_step<=len(self.data) - (self.n * self.episode_size + 1):
+                self.initial_step = initial_step
+            else:
+                raise ValueError(f"The initial step has to be in [{self.window_size},{initial_step<=len(self.data) - (self.n * self.episode_size + 1)}]")
+        else:
+            raise ValueError("The initial step has to be a string or an integers")
+        
         self.current_step = self.initial_step
 
         self.wallet = 0
@@ -69,7 +98,7 @@ class TradingEnv(Order):
         self._update_historics(action=action,position=self.position)
 
         next_state = self._get_state()
-        reward = self.calculate_reward()
+        reward = self.reward_function()
 
         if self.current_step - self.initial_step >= self.episode_size:
             self.done = True
@@ -122,6 +151,15 @@ class TradingEnv(Order):
         self.historic_position = np.concatenate((self.historic_position, np.array([[position]])), axis=0)
         self.historic_action = np.concatenate((self.historic_action, np.array([[action]])), axis=0)
 
+    def _get_reward_function(self,reward_function:str):
+        if type(reward_function) == str:
+            if reward_function == 'default':
+                return self.calculate_reward
+            else:
+                raise ValueError(f"reward function:{reward_function} doesn't exist.")
+        else:
+            return reward_function
+    
     def calculate_reward(self):
         return self.historic_wallet[-1][0] - self.historic_wallet[-2][0]
     

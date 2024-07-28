@@ -19,7 +19,7 @@ def main(config):
     run_folder = os.path.join(config['SAVE_DIR'], f"config_{config['RUN_ID']}")
     
     # Load dataset
-    dataset = pd.read_csv(config['DATA_PATH']).to_numpy()
+    dataset = pd.read_csv(config['DATA_PATH'])[:200].to_numpy()
 
     # Initialize environments
     mode = {
@@ -28,9 +28,8 @@ def main(config):
         'include_historic_action': config['MODE']['include_historic_action'],
         'include_historic_wallet': config['MODE']['include_historic_wallet']
     }
-    env = TradingEnv(data=dataset, window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TRAIN'], mode=mode)
-    env_test = TradingEnv(data=dataset, window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TEST'], mode=mode)
-    env.reset()
+    env = TradingEnv(data=dataset, window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TRAIN'], mode=mode, reward_function=config['REWARD_FUNCTION'])
+    env_test = TradingEnv(data=dataset, window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TEST'], mode=mode, reward_function=config['REWARD_FUNCTION'])
 
     # Initialize agent
     agent = DQNTrader(
@@ -91,6 +90,8 @@ def main(config):
     print('Training completed and models saved.')
 
     # Save final scores
+    model_save_path = os.path.join(run_folder, f"model_final.keras")
+    agent.target_model.save(model_save_path)
     score_save_path = os.path.join(run_folder, "train_scores_final.npy")
     np.save(score_save_path, train_scores)
 

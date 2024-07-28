@@ -21,6 +21,7 @@ def main(args):
             'include_historic_action': args.include_historic_action,
             'include_historic_wallet': args.include_historic_wallet
         },
+        "REWARD_FUNCTION":args.reward_function,
         "LSTM_LAYER": args.lstm_layer,
         "EPSILON": args.epsilon,
         "EPSILON_MIN": args.epsilon_min,
@@ -54,13 +55,14 @@ if __name__ == "__main__":
     parser.add_argument('--window_size', type=int, default=21)
     parser.add_argument('--episode_size', type=int, default=84)
     parser.add_argument('--nb_episode', type=int, default=200)
-    parser.add_argument('--initial_step', type=int, default=-1)
+    parser.add_argument('--initial_step', type=None, default='random')
     parser.add_argument('--n_train', type=int, default=2)
     parser.add_argument('--n_test', type=int, default=1)
     parser.add_argument('--include_price', type=bool, default=False)
     parser.add_argument('--include_historic_position', type=bool, default=False)
     parser.add_argument('--include_historic_action', type=bool, default=False)
     parser.add_argument('--include_historic_wallet', type=bool, default=False)
+    parser.add_argument('--reward_function',type=str,default='default')
     parser.add_argument('--lstm_layer', nargs='+', type=int, default=[64, 8])
     parser.add_argument('--epsilon', type=float, default=1)
     parser.add_argument('--epsilon_min', type=float, default=0.01)

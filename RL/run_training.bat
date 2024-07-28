@@ -22,22 +22,24 @@ python -m RL.config ^
   --save_dir %SAVE_DIR% ^
   --window_size 21 ^
   --episode_size 84 ^
-  --nb_episode 200 ^
-  --initial_step -1 ^
+  --nb_episode 10 ^
+  --initial_step "sequential" ^
   --n_train 2 ^
   --n_test 1 ^
   --include_price False ^
   --include_historic_position False ^
   --include_historic_action False ^
   --include_historic_wallet False ^
-  --lstm_layer 64 8 ^
+  --reward_function "default" ^
+  --lstm_layer 16 8 ^
   --epsilon 1 ^
+  --epsilon_decay None ^
   --epsilon_min 0.01 ^
   --buffer_size 15000 ^
   --gamma 0.995 ^
   --batch_size 16 ^
-  --iter_save_model_score 25 ^
-  --iter_save_target_model 10 ^
+  --iter_save_model_score 5 ^
+  --iter_save_target_model 2 ^
   --iter_test 1 ^
   --figure_title "Values of portfolio function of episodes" ^
   --data_path "C:\Users\Ugo\Documents\AI\Forex_ML\RL\DATA\FAKE_DATA_TRAIN.csv"
