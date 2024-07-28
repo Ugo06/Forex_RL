@@ -101,7 +101,6 @@ class TradingEnv(Order):
 
         next_state = self._get_state()
         reward = self.reward_function()
-        print(reward)
 
         if self.current_step - self.initial_step >= self.episode_size:
             self.done = True
