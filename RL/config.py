@@ -25,7 +25,7 @@ def main(args):
         "LSTM_LAYER": args.lstm_layer,
         "EPSILON": args.epsilon,
         "EPSILON_MIN": args.epsilon_min,
-        "EPSILON_DECAY": args.epsilon_decay if args.epsilon_decay is not None else args.epsilon_min ** (1 / args.nb_episode),
+        "EPSILON_DECAY": args.epsilon_min ** (1 / args.nb_episode) if args.epsilon_decay is 'default' else args.epsilon_decay,
         "BUFFER_SIZE": args.buffer_size,
         "GAMMA": args.gamma,
         "BATCH_SIZE": args.batch_size,
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     parser.add_argument('--lstm_layer', nargs='+', type=int, default=[64, 8])
     parser.add_argument('--epsilon', type=float, default=1)
     parser.add_argument('--epsilon_min', type=float, default=0.01)
-    parser.add_argument('--epsilon_decay', type=float, default=None)
+    parser.add_argument('--epsilon_decay', type=float, default='default')
     parser.add_argument('--buffer_size', type=int, default=15000)
     parser.add_argument('--gamma', type=float, default=0.995)
     parser.add_argument('--batch_size', type=int, default=16)
