@@ -1,6 +1,6 @@
 import numpy as np
 import random as rd
-from Tools import Order
+from utils.tools import Order
 
 class TradingEnv(Order):
     def __init__(self, data: np.array, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: int = -1, mode: dict = None):
@@ -22,16 +22,16 @@ class TradingEnv(Order):
         self.initial_step = rd.randint(self.window_size, len(self.data) - (self.n * self.episode_size + 1)) if initial_step < 0 else initial_step
         self.current_step = self.initial_step
         self.state_size = self._calculate_state_size()
-        
+      
+        self.orders = []
+        self.position = 0
+        self.wallet = 0
+
         self.historic_position = np.zeros((self.window_size, 1))
         self.historic_action = np.full((self.window_size, 1), 0)
         self.historic_wallet = np.full((self.window_size, 1), self.wallet)
 
         self.done = False
-        self.orders = []
-        self.position = 0
-        
-        self.wallet = 0
 
     def reset(self, initial_step: int = -1):
         self.initial_step = rd.randint(self.window_size, len(self.data) - (self.n * self.episode_size + 1)) if initial_step < 0 else initial_step
@@ -142,7 +142,7 @@ class TradingEnv(Order):
         additional_features = []
 
         if self.mode['include_price']:
-            price_feature = self.data[self.current_step - self.window_size:self.current_step, 0].copy()
+            price_feature = self.data[self.current_step - self.window_size:self.current_step, 0:1].copy()
             additional_features.append(price_feature)
 
         if self.mode['include_historic_position']:
@@ -155,8 +155,8 @@ class TradingEnv(Order):
             additional_features.append(self.historic_wallet[-self.window_size:])
 
         if additional_features:
-            additional_features = np.concatenate(additional_features, axis=1)
-            return np.concatenate((data_state, additional_features), axis=1)
+            additional_features = np.hstack(additional_features)
+            return np.hstack((data_state, additional_features))
         else:
             return data_state
 

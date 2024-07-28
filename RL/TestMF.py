@@ -1,6 +1,6 @@
 from AgentMasterFinance import DQNTrader
-from EnvMasterFinance import TradingEnvIAR
-from Tools import PrepareData
+from RL.utils.EnvMasterFinance import TradingEnv
+from utils.tools import PrepareData
 
 import pandas as pd
 from tqdm.auto import tqdm
