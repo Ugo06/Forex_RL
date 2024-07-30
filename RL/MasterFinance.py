@@ -47,6 +47,8 @@ def main(config):
     # Training variables
     train_scores = []
     test_scores = []
+    order_duration = []
+    nb_order = []
     progress_bar = tqdm(range(config['EPISODE_SIZE'] * config['NB_EPISODE']))
 
     for episode in range(1, config['NB_EPISODE'] + 1):
@@ -84,8 +86,13 @@ def main(config):
                     np.save(score_save_path, train_scores)
 
                 train_scores.append(env.wallet)
+                nb_order.append(len(env.orders))
+                duration = np.array([order.end_date-order.start_date for order in env.orders])
+                duration = np.mean(duration)
+                order_duration.append(duration)
+                    
                 print("Épisode :", episode,"Récompense totale :", env.wallet)
-                print("nombre de position ouverte: ",len(env.orders))
+                print("nombre de position ouverte: ",len(env.orders),"Durée moyenne d'une position ouverte: ",duration)
                 break
 
             if len(agent.memory.buffer) > config['BATCH_SIZE']:
@@ -98,6 +105,12 @@ def main(config):
     agent.target_model.save(model_save_path)
     score_save_path = os.path.join(run_folder, "train_scores_final.npy")
     np.save(score_save_path, train_scores)
+    score_save_path = os.path.join(run_folder, "test_scores_final.npy")
+    np.save(score_save_path, test_scores)
+    duration_save_path = os.path.join(run_folder, "duration_opened_position.npy")
+    np.save(duration_save_path, order_duration)
+    number_save_path = os.path.join(run_folder, "number_opened_position.npy")
+    np.save(number_save_path, nb_order)
 
     # Plot results
     X = np.arange(1, config['NB_EPISODE'] + 1)
@@ -111,6 +124,34 @@ def main(config):
     plt.legend()
     plt.title(config['FIGURE_TITLE'])
     figure_save_path = os.path.join(run_folder, "scores_plot.png")
+    plt.savefig(figure_save_path)
+    plt.close()
+
+    fig, ax1 = plt.subplots()
+
+    # Tracer order_duration sur l'axe y de gauche
+    ax1.set_xlabel('Episode')
+    ax1.set_ylabel('Mean duration of an opened position', color='tab:blue')
+    ax1.plot(X, order_duration, color='tab:blue', label='Mean duration of a opened position')
+    ax1.tick_params(axis='y', labelcolor='tab:blue')
+
+    # Créer un second axe y pour nb_order
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Number of opened position', color='tab:red')
+    ax2.plot(X, nb_order, color='tab:red', label='Number of opened position')
+    ax2.tick_params(axis='y', labelcolor='tab:red')
+
+    # Ajouter la légende pour les deux axes
+    fig.tight_layout()  # Pour ajuster automatiquement la disposition
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc='upper left')
+
+    # Ajouter un titre
+    plt.title('Mean Duration of Opened Positions and Number of Opened Positions per Episode')
+
+    # Sauvegarder la figure
+    figure_save_path = os.path.join(run_folder, "time_order_plot.png")
     plt.savefig(figure_save_path)
     plt.close()
 

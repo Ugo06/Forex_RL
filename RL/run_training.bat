@@ -26,14 +26,14 @@ python -m RL.config ^
   --initial_step "sequential" ^
   --n_train 2 ^
   --n_test 1 ^
-  --include_price "False" ^
+  --include_price "True" ^
   --include_historic_position "False" ^
   --include_historic_action "False" ^
   --include_historic_wallet "False" ^
   --wallet 0 ^
   --reward_function "default" ^
-  --type "cnn"^
-  --config_layer "[{'filters': 64, 'kernel_size': (3, 1), 'pool_size': (2, 1)}, {'filters': 16, 'kernel_size': (3, 1), 'pool_size': (2, 1)}]" ^
+  --type "lstm"^
+  --config_layer "[16,8]" ^
   --epsilon 1 ^
   --epsilon_decay "default" ^
   --epsilon_min 0.01 ^
