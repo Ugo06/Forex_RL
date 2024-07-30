@@ -35,11 +35,13 @@ def main(config):
     agent = DQNTrader(
         state_size=env.state_size,
         action_size=env.action_size,
-        lstm_layer=config['LSTM_LAYER'],
+        type=config['TYPE'],
+        config_layer=config['CONFIG_LAYER'],
         epsilon_decay=config['EPSILON_DECAY'],
         epsilon_min=config['EPSILON_MIN'],
         buffer_size=config['BUFFER_SIZE'],
-        gamma=config['GAMMA']
+        gamma=config['GAMMA'],
+        batch_size=config['BATCH_SIZE']
     )
 
     # Training variables
@@ -87,7 +89,7 @@ def main(config):
                 break
 
             if len(agent.memory.buffer) > config['BATCH_SIZE']:
-                agent.replay(config['BATCH_SIZE'])
+                agent.replay()
 
     print('Training completed and models saved.')
 

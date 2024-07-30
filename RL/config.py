@@ -4,8 +4,16 @@ import argparse
 import argparse
 import json
 import os
+import ast
+
+def str2bool(v):
+    print(type(v),v)
+    return v.lower() in ("yes", "true", "t", "1")
 
 def main(args):
+    args.config_layer = ''.join(args.config_layer)
+    args.config_layer = eval(args.config_layer)
+
     config = {
         "SAVE_DIR": args.save_dir,
         "RUN_ID": args.run_id,
@@ -16,14 +24,15 @@ def main(args):
         "N_TRAIN": args.n_train,
         "N_TEST": args.n_test,
         "MODE": {
-            'include_price': args.include_price,
-            'include_historic_position': args.include_historic_position,
-            'include_historic_action': args.include_historic_action,
-            'include_historic_wallet': args.include_historic_wallet
+            'include_price': str2bool(args.include_price),
+            'include_historic_position': str2bool(args.include_historic_position),
+            'include_historic_action': str2bool(args.include_historic_action),
+            'include_historic_wallet': str2bool(args.include_historic_wallet)
         },
         "WALLET":args.wallet,
         "REWARD_FUNCTION":args.reward_function,
-        "LSTM_LAYER": args.lstm_layer,
+        "TYPE":args.type,
+        "CONFIG_LAYER": args.config_layer,
         "EPSILON": args.epsilon,
         "EPSILON_MIN": args.epsilon_min,
         "EPSILON_DECAY": args.epsilon_min ** (1 / args.nb_episode) if args.epsilon_decay in 'default' else args.epsilon_decay,
@@ -59,13 +68,14 @@ if __name__ == "__main__":
     parser.add_argument('--initial_step', type=None, default='random')
     parser.add_argument('--n_train', type=int, default=2)
     parser.add_argument('--n_test', type=int, default=1)
-    parser.add_argument('--include_price', type=bool, default=False)
-    parser.add_argument('--include_historic_position', type=bool, default=False)
-    parser.add_argument('--include_historic_action', type=bool, default=False)
-    parser.add_argument('--include_historic_wallet', type=bool, default=False)
+    parser.add_argument('--include_price', type=str, default='False')
+    parser.add_argument('--include_historic_position', type=str, default='False')
+    parser.add_argument('--include_historic_action', type=str, default='False')
+    parser.add_argument('--include_historic_wallet', type=str, default='False')
     parser.add_argument('--reward_function',type=str,default='default')
     parser.add_argument('--wallet',type=int,default=0)
-    parser.add_argument('--lstm_layer', nargs='+', type=int, default=[64, 8])
+    parser.add_argument('--type', type=str, default='lstm')
+    parser.add_argument('--config_layer', type=None, default=[64, 8])
     parser.add_argument('--epsilon', type=float, default=1)
     parser.add_argument('--epsilon_min', type=float, default=0.01)
     parser.add_argument('--epsilon_decay', type=None, default='default')

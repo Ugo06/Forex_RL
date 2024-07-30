@@ -21,6 +21,7 @@ class TradingEnv(Order):
             'include_historic_action': False,
             'include_historic_wallet': False
         }
+        print(mode['include_historic_position'])
 
         if type(initial_step) ==str:
             if initial_step == 'random':
@@ -40,7 +41,8 @@ class TradingEnv(Order):
       
         self.orders = []
         self.position = 0
-        self.wallet = wallet
+        self.initial_wallet = wallet
+        self.wallet = self.initial_wallet
 
         self.historic_position = np.zeros((self.window_size, 1))
         self.historic_action = np.full((self.window_size, 1), 0)
@@ -68,7 +70,7 @@ class TradingEnv(Order):
         
         self.current_step = self.initial_step
 
-        self.wallet = 0
+        self.wallet = self.initial_wallet
         self.orders = []
         self.position = 0
         
@@ -162,6 +164,10 @@ class TradingEnv(Order):
                 return self.reward_on_PF
             elif reward_function == 'log_portfolio':
                 return self.log_reward_on_PF
+            elif reward_function == 'norm_open_position':
+                return self.norm_open_position_reward
+            elif reward_function == 'open_position':
+                return self.open_position_reward
             else:
                 raise ValueError(f"reward function:{reward_function} doesn't exist.")
         else:
@@ -180,9 +186,32 @@ class TradingEnv(Order):
     
     def log_reward_on_PF(self):
         if self.historic_wallet[-1][0]<=0:
-            self.done=True
             return 0
         return log(self.historic_wallet[-1][0]/self.historic_wallet[-2][0])
+    
+    def norm_open_position_reward(self):
+        if len(self.orders)==0:
+            return 0 
+        else:
+            if self.orders[-1].end_date==0:
+                current_price = self.data[self.current_step][0]
+                opening_price = self.data[self.orders[-1].start_date][0]
+                position = self.orders[-1].order_type
+                return position*(current_price-opening_price)/opening_price
+            else:
+                return 0
+    
+    def open_position_reward(self):
+        if len(self.orders)==0:
+            return 0 
+        else:
+            if self.orders[-1].end_date==0:
+                current_price = self.data[self.current_step][0]
+                opening_price = self.data[self.orders[-1].start_date][0]
+                position = self.orders[-1].order_type
+                return position*(current_price-opening_price)/0.001
+            else:
+                return 0
     
     
     def _calculate_state_size(self):

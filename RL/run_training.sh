@@ -16,8 +16,8 @@ python -m RL.config \
   --initial_step -1 \
   --n_train 2 \
   --n_test 1 \
-  --include_price False \
-  --include_historic_position False \
+  --include_price false \
+  --include_historic_position Fa \
   --include_historic_action False \
   --include_historic_wallet False \
   --lstm_layer 64 8 \
