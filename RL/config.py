@@ -38,6 +38,7 @@ def main(args):
         "EPSILON_DECAY": args.epsilon_min ** (1 / args.nb_episode) if args.epsilon_decay in 'default' else args.epsilon_decay,
         "BUFFER_SIZE": args.buffer_size,
         "GAMMA": args.gamma,
+        "ALPHA": args.alpha,
         "BATCH_SIZE": args.batch_size,
         "ITER_SAVE_MODEL_SCORE": args.iter_save_model_score,
         "ITER_SAVE_TARGET_MODEL": args.iter_save_target_model,
@@ -81,6 +82,7 @@ if __name__ == "__main__":
     parser.add_argument('--epsilon_decay', type=None, default='default')
     parser.add_argument('--buffer_size', type=int, default=15000)
     parser.add_argument('--gamma', type=float, default=0.995)
+    parser.add_argument('--alpha', type=float, default=0.001)
     parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--iter_save_model_score', type=int, default=25)
     parser.add_argument('--iter_save_target_model', type=int, default=10)

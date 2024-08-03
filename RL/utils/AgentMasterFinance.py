@@ -9,7 +9,16 @@ from tensorflow.keras.optimizers import Adam
 
 
 class DQNTrader:
-    def __init__(self, state_size:int, action_size:int,type:float='lstm', config_layer:list=[128,16],batch_size:int=16,buffer_size:int=40000, gamma:float = 0.995, espilon:float= 1, epsilon_decay:float = 0.95, epsilon_min:float= 0.01):
+    def __init__(self, state_size:int, 
+                 action_size:int,type:float='lstm', 
+                 config_layer:list=[128,16],
+                 batch_size:int=16,buffer_size:int=40000, 
+                 gamma:float = 0.995,
+                 alpha:float = 1e-5,
+                 espilon:float= 1, 
+                 epsilon_decay:float = 0.95, 
+                 epsilon_min:float= 0.01):
+        
         self.state_size = state_size
         self.action_size = action_size
 
@@ -17,6 +26,7 @@ class DQNTrader:
         self.batch_size = batch_size
         
         self.gamma = gamma
+        self.alpha = alpha
         self.epsilon = espilon
         self.epsilon_decay = epsilon_decay
         self.epsilon_min = epsilon_min
@@ -48,7 +58,7 @@ class DQNTrader:
         output_q_values = Dense(self.action_size, activation='linear')(dropout_layer2)
 
         model = Model(inputs=input_state, outputs=output_q_values)
-        model.compile(loss='mse', optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
+        model.compile(loss='mse', optimizer=Adam(learning_rate=self.alpha), metrics=['accuracy'])
     
         return model
     
@@ -73,7 +83,7 @@ class DQNTrader:
         output_q_values = Dense(self.action_size, activation='linear')(dropout_layer2)
 
         model = Model(inputs=input_state, outputs=output_q_values)
-        model.compile(loss='mse', optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
+        model.compile(loss='mse', optimizer=Adam(learning_rate=self.alpha), metrics=['accuracy'])
         
         return model
 

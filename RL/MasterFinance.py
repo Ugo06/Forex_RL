@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 import argparse
 
+from utils.tools import PrepareData
 from utils.AgentMasterFinance import DQNTrader
 from utils.EnvMasterFinance import TradingEnv
 
@@ -20,6 +21,9 @@ def main(config):
     
     # Load dataset
     dataset = pd.read_csv(config['DATA_PATH']).to_numpy()
+    data = PrepareData(dataset)
+    data.normalize()
+    dataset = data.norm_data
 
     # Initialize environments
     mode = {
@@ -41,6 +45,7 @@ def main(config):
         epsilon_min=config['EPSILON_MIN'],
         buffer_size=config['BUFFER_SIZE'],
         gamma=config['GAMMA'],
+        alpha=config['ALPHA'],
         batch_size=config['BATCH_SIZE']
     )
 
@@ -85,6 +90,9 @@ def main(config):
                     score_save_path = os.path.join(run_folder, f"train_scores_episode_{episode}.npy")
                     np.save(score_save_path, train_scores)
 
+                if len(agent.memory.buffer) > config['BATCH_SIZE']:
+                    agent.replay()
+                
                 train_scores.append(env.wallet)
                 nb_order.append(len(env.orders))
                 duration = np.array([order.end_date-order.start_date for order in env.orders])
@@ -95,8 +103,6 @@ def main(config):
                 print("nombre de position ouverte: ",len(env.orders),"Durée moyenne d'une position ouverte: ",duration)
                 break
 
-            if len(agent.memory.buffer) > config['BATCH_SIZE']:
-                agent.replay()
 
     print('Training completed and models saved.')
 

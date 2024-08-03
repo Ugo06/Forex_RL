@@ -27,11 +27,11 @@ python -m RL.config ^
   --n_train 2 ^
   --n_test 1 ^
   --include_price "True" ^
-  --include_historic_position "False" ^
+  --include_historic_position "True" ^
   --include_historic_action "False" ^
   --include_historic_wallet "False" ^
   --wallet 0 ^
-  --reward_function "default" ^
+  --reward_function "long_term_0" ^
   --type "lstm"^
   --config_layer "[16,8]" ^
   --epsilon 1 ^
@@ -39,12 +39,13 @@ python -m RL.config ^
   --epsilon_min 0.01 ^
   --buffer_size 15000 ^
   --gamma 0.995 ^
-  --batch_size 16 ^
+  --alpha 1e-5 ^
+  --batch_size 128 ^
   --iter_save_model_score 25 ^
   --iter_save_target_model 10 ^
   --iter_test 4 ^
   --figure_title "Values of portfolio function of episodes" ^
-  --data_path "C:\Users\Ugo\Documents\AI\Forex_ML\RL\DATA\NOISY_FAKE_DATA_TRAIN.csv"
+  --data_path "C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TRAIN.csv"
 
 REM Run the MasterFinance script using the saved configuration
 python -m RL.MasterFinance --config_path "%SAVE_DIR%\config_%RUN_ID%\config.json"

@@ -158,7 +158,7 @@ class TradingEnv(Order):
 
     def _get_reward_function(self,reward_function:str):
         if type(reward_function) == str:
-            if reward_function == 'default':
+            if reward_function == 'initial_wallet':
                 return self.default_reward
             elif reward_function == 'portfolio':
                 return self.reward_on_PF
@@ -168,6 +168,16 @@ class TradingEnv(Order):
                 return self.norm_open_position_reward
             elif reward_function == 'open_position':
                 return self.open_position_reward
+            elif reward_function == 'sortino_reward':
+                return self.sortino_ratio_reward
+            elif reward_function == 'mean_return':
+                return self.mean_return_reward
+            elif reward_function == 'sharpe_ratio':
+                return self.sharpe_ratio_reward
+            elif reward_function == 'long_term_0':
+                return self.long_term_reward_0
+            elif reward_function == 'long_term_1':
+                return self.long_term_reward_1
             else:
                 raise ValueError(f"reward function:{reward_function} doesn't exist.")
         else:
@@ -180,6 +190,7 @@ class TradingEnv(Order):
             return -1
         else:
             return 0
+    
     
     def reward_on_PF(self):
         return self.historic_wallet[-1][0] - self.historic_wallet[-2][0]
@@ -202,7 +213,7 @@ class TradingEnv(Order):
                 return 0
     
     def open_position_reward(self):
-        if len(self.orders)==0:
+        if len(self.orders)==0 or self.orders[-1].end_date != 0:
             return 0 
         else:
             if self.orders[-1].end_date==0:
@@ -213,6 +224,73 @@ class TradingEnv(Order):
             else:
                 return 0
     
+    def mean_return_reward(self):
+        returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
+        if not returns:
+            return 0
+        mean_return = np.mean(returns)
+        
+        return mean_return
+    
+    def sharpe_ratio_reward(self):
+        returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
+        if not returns:
+            return 0
+        mean_return = np.mean(returns)
+        std_return = np.std(returns)
+        return mean_return / std_return if std_return != 0 else 0
+    
+    def sortino_ratio_reward(self):
+        returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
+        if not returns:
+            return 0
+        mean_return = np.mean(returns)
+        downside_deviation = np.sqrt(np.mean([min(0, r)**2 for r in returns]))
+        return mean_return / downside_deviation if downside_deviation != 0 else 0
+    
+    def long_term_reward_0(self):
+        if len(self.orders) == 0 or self.orders[-1].end_date != 0:
+            return 0
+        
+        current_price = self.data[self.current_step][0]
+        opening_price = self.data[self.orders[-1].start_date][0]
+        position = self.orders[-1].order_type
+
+
+        current_profit = position * (current_price - opening_price) / 0.001
+
+        max_profit = max([position*(self.data[i][0] - opening_price) / 0.001 for i in range(self.orders[-1].start_date, self.current_step + 1)])
+
+        if current_profit >=max_profit:
+            return 1
+        elif current_profit >= 0.5 * max_profit and current_profit < max_profit:
+            return 0.5
+        elif current_profit < 0.5 * max_profit and current_profit >=0:
+            return 0
+        else:
+            return -1
+        
+    def long_term_reward_1(self):
+        if len(self.orders) == 0 or self.orders[-1].end_date != 0:
+            self.cumulative_reward = 0
+            return 0
+
+        opening_price = self.data[self.orders[-1].start_date][0]
+        position = self.orders[-1].order_type
+
+        position_profit = [position*(self.data[i][0] - opening_price) / 0.001 for i in range(self.orders[-1].start_date, self.current_step + 1)]
+
+        # Initialize reward
+        if not hasattr(self, 'cumulative_reward'):
+            self.cumulative_reward = 0
+
+        # Reward logic
+        if position_profit[-1] > position_profit[-2]:
+            self.cumulative_reward += 1
+        elif position_profit[-1] > position_profit[-2]:
+            self.cumulative_reward -= 1
+
+        return self.cumulative_reward
     
     def _calculate_state_size(self):
         state_columns = 0
