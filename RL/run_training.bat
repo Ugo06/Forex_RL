@@ -20,27 +20,30 @@ REM Run the config script to save the configuration
 python -m RL.config ^
   --run_id %RUN_ID% ^
   --save_dir %SAVE_DIR% ^
-  --window_size 21 ^
+  --window_size 42 ^
   --episode_size 84 ^
-  --nb_episode 100 ^
-  --initial_step "sequential" ^
+  --nb_episode 1000 ^
+  --initial_step "random" ^
   --n_train 2 ^
   --n_test 1 ^
   --include_price "True" ^
   --include_historic_position "True" ^
   --include_historic_action "False" ^
   --include_historic_wallet "False" ^
+  --include_historic_orders "True" ^
   --wallet 0 ^
-  --reward_function "long_term_0" ^
+  --reward_function "sharpe_ratio" ^
+  --zeta 10 ^
+  --beta 0.1 ^
   --type "lstm"^
-  --config_layer "[16,8]" ^
+  --config_layer "[64,16]" ^
   --epsilon 1 ^
   --epsilon_decay "default" ^
   --epsilon_min 0.01 ^
   --buffer_size 15000 ^
-  --gamma 0.995 ^
-  --alpha 1e-5 ^
-  --batch_size 128 ^
+  --gamma 0.99 ^
+  --alpha 1e-4 ^
+  --batch_size 16 ^
   --iter_save_model_score 25 ^
   --iter_save_target_model 10 ^
   --iter_test 4 ^

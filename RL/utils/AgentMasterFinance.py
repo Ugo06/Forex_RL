@@ -51,9 +51,9 @@ class DQNTrader:
                 x = LSTM(lstm_layer[1], return_sequences=True, stateful=False)(x)
             else:
                 x = LSTM(lstm_layer[1], return_sequences=False, stateful=False)(x)
-        dense_layer1 = Dense(32, activation='elu')(x)
+        dense_layer1 = Dense(16, activation='elu')(x)
         dropout_layer1 = Dropout(0.5)(dense_layer1)
-        dense_layer2 = Dense(16, activation='elu')(dropout_layer1)
+        dense_layer2 = Dense(4, activation='elu')(dropout_layer1)
         dropout_layer2 = Dropout(0.5)(dense_layer2)
         output_q_values = Dense(self.action_size, activation='linear')(dropout_layer2)
 

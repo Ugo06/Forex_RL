@@ -109,7 +109,7 @@ class StockMarket(News) :
 
 size = 40000
 
-SM = StockMarket(5)
+SM = StockMarket(1)
 SM.generate(size)
 
 

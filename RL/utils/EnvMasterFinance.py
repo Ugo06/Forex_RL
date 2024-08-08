@@ -5,7 +5,7 @@ from math import log
 from utils.tools import Order
 
 class TradingEnv(Order):
-    def __init__(self, data: np.array, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: None = 'random', mode: dict = None,wallet:int=0, reward_function: str = "default"):
+    def __init__(self, data: np.array, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: None = 'random', mode: dict = None,wallet:int=0, reward_function: str = "default",zeta:float=1,beta:float=1):
         
         self.data = data
 
@@ -19,7 +19,8 @@ class TradingEnv(Order):
             'include_price': False,
             'include_historic_position': False,
             'include_historic_action': False,
-            'include_historic_wallet': False
+            'include_historic_wallet': False,
+            'include_historic_orders': False,
         }
         print(mode['include_historic_position'])
 
@@ -47,8 +48,12 @@ class TradingEnv(Order):
         self.historic_position = np.zeros((self.window_size, 1))
         self.historic_action = np.full((self.window_size, 1), 0)
         self.historic_wallet = np.full((self.window_size, 1), self.wallet)
+        self.historic_orders = np.full((self.window_size,1),0)
 
         self.done = False
+
+        self.zeta = zeta
+        self.beta = beta
 
     def reset(self, initial_step: None = 'random'):
         
@@ -77,6 +82,7 @@ class TradingEnv(Order):
         self.historic_position = np.zeros((self.window_size, 1))
         self.historic_action = np.full((self.window_size, 1), 0)
         self.historic_wallet = np.full((self.window_size, 1), self.wallet)
+        self.historic_orders = np.full((self.window_size,1),0)
 
         state = self._get_state()
         self.state_size = self._calculate_state_size()
@@ -152,9 +158,19 @@ class TradingEnv(Order):
         current_price = self.data[self.current_step][0]
         previous_price = self.data[self.current_step - 1][0]
         self.wallet += self.position * (current_price - previous_price) / 0.001
+        
+        if len(self.orders) == 0:
+            value_order = 0
+        else:
+            if self.orders[-1].end_date == 0:
+                value_order = self.orders[-1].order_type*(self.data[self.current_step][0]-self.data[self.orders[-1].start_date][0])
+            else:
+                value_order = 0
+        
         self.historic_wallet = np.concatenate((self.historic_wallet, np.array([[self.wallet]])), axis=0)
         self.historic_position = np.concatenate((self.historic_position, np.array([[position]])), axis=0)
         self.historic_action = np.concatenate((self.historic_action, np.array([[action]])), axis=0)
+        self.historic_orders = np.concatenate((self.historic_orders, np.array([[value_order]])), axis=0)
 
     def _get_reward_function(self,reward_function:str):
         if type(reward_function) == str:
@@ -224,21 +240,51 @@ class TradingEnv(Order):
             else:
                 return 0
     
-    def mean_return_reward(self):
+    def mean_reward(self):
         returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
-        if not returns:
-            return 0
-        mean_return = np.mean(returns)
-        
-        return mean_return
-    
-    def sharpe_ratio_reward(self):
-        returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
+        returns = returns[-self.window_size:]
         if not returns:
             return 0
         mean_return = np.mean(returns)
         std_return = np.std(returns)
-        return mean_return / std_return if std_return != 0 else 0
+        if len(self.orders) == 0:
+            duration = 1
+        else:
+            duration = []
+            for order in self.orders:
+                if order.end_date != 0:
+                    duration.append(order.end_date-order.start_date)
+                else:
+                    duration.append(self.current_step-order.start_date)
+            duration = np.mean(duration)
+
+        reward = (mean_return / std_return)*self.zeta - self.beta/duration 
+        if reward >100:
+            reward = 100
+        return reward
+    
+    def sharpe_ratio_reward(self):
+        returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
+        returns = returns[-self.window_size:]
+        if not returns:
+            return 0
+        mean_return = np.mean(returns)
+        std_return = np.std(returns)
+        if len(self.orders) == 0:
+            duration = 1
+        else:
+            duration = []
+            for order in self.orders:
+                if order.end_date != 0:
+                    duration.append(order.end_date-order.start_date)
+                else:
+                    duration.append(self.current_step-order.start_date)
+            duration = np.mean(duration)
+
+        reward = (mean_return / std_return)*self.zeta - self.beta/duration if std_return != 0 else 0
+        if reward >100:
+            reward = 100
+        return reward
     
     def sortino_ratio_reward(self):
         returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
@@ -263,9 +309,9 @@ class TradingEnv(Order):
 
         if current_profit >=max_profit:
             return 1
-        elif current_profit >= 0.5 * max_profit and current_profit < max_profit:
-            return 0.5
-        elif current_profit < 0.5 * max_profit and current_profit >=0:
+        elif current_profit >= 0.8 * max_profit and current_profit < max_profit:
+            return 1
+        elif current_profit < 0.8 * max_profit and current_profit >=0:
             return 0
         else:
             return -1
@@ -302,6 +348,8 @@ class TradingEnv(Order):
             state_columns += 1
         if self.mode['include_historic_wallet']:
             state_columns += 1
+        if self.mode['include_historic_orders']:
+            state_columns += 1
         return (self.window_size, state_columns + np.shape(self.data[:, 1:])[1])
 
     def _get_state(self):
@@ -320,6 +368,9 @@ class TradingEnv(Order):
 
         if self.mode['include_historic_wallet']:
             additional_features.append(self.historic_wallet[-self.window_size:])
+        
+        if self.mode['include_historic_orders']:
+            additional_features.append(self.historic_orders[-self.window_size:])
 
         if additional_features:
             additional_features = np.hstack(additional_features)

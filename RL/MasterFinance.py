@@ -30,10 +30,11 @@ def main(config):
         'include_price': config['MODE']['include_price'],
         'include_historic_position': config['MODE']['include_historic_position'],
         'include_historic_action': config['MODE']['include_historic_action'],
-        'include_historic_wallet': config['MODE']['include_historic_wallet']
+        'include_historic_wallet': config['MODE']['include_historic_wallet'],
+        'include_historic_orders': config['MODE']['include_historic_orders'],
     }
-    env = TradingEnv(data=dataset, window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TRAIN'], mode=mode, reward_function=config['REWARD_FUNCTION'],wallet=config['WALLET'])
-    env_test = TradingEnv(data=dataset, window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TEST'], mode=mode, reward_function=config['REWARD_FUNCTION'],wallet=config['WALLET'])
+    env = TradingEnv(data=dataset, window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TRAIN'], mode=mode, reward_function=config['REWARD_FUNCTION'],wallet=config['WALLET'],zeta=config['ZETA'],beta=config['BETA'])
+    env_test = TradingEnv(data=dataset, window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TEST'], mode=mode, reward_function=config['REWARD_FUNCTION'],wallet=config['WALLET'],zeta=config['ZETA'],beta=config['BETA'])
 
     # Initialize agent
     agent = DQNTrader(
@@ -50,6 +51,7 @@ def main(config):
     )
 
     # Training variables
+    REWARD = []
     train_scores = []
     test_scores = []
     order_duration = []
@@ -58,7 +60,7 @@ def main(config):
 
     for episode in range(1, config['NB_EPISODE'] + 1):
         state = np.array([env.reset()])
-
+        total_reward = 0
         while True:
             action = agent.act(state)
             next_state, reward, done, action, _ = env.step(action)
@@ -66,6 +68,7 @@ def main(config):
             agent.remember(state, action, reward, next_state, done)
             state = next_state
 
+            total_reward += reward
             progress_bar.update(1)
 
             if done:
@@ -89,19 +92,19 @@ def main(config):
                     agent.target_model.save(model_save_path)
                     score_save_path = os.path.join(run_folder, f"train_scores_episode_{episode}.npy")
                     np.save(score_save_path, train_scores)
-
-                if len(agent.memory.buffer) > config['BATCH_SIZE']:
-                    agent.replay()
                 
                 train_scores.append(env.wallet)
                 nb_order.append(len(env.orders))
                 duration = np.array([order.end_date-order.start_date for order in env.orders])
                 duration = np.mean(duration)
                 order_duration.append(duration)
-                    
+                REWARD.append(total_reward)
                 print("Épisode :", episode,"Récompense totale :", env.wallet)
                 print("nombre de position ouverte: ",len(env.orders),"Durée moyenne d'une position ouverte: ",duration)
                 break
+            
+            if len(agent.memory.buffer) > config['BATCH_SIZE']:
+                 agent.replay()
 
 
     print('Training completed and models saved.')
@@ -130,6 +133,15 @@ def main(config):
     plt.legend()
     plt.title(config['FIGURE_TITLE'])
     figure_save_path = os.path.join(run_folder, "scores_plot.png")
+    plt.savefig(figure_save_path)
+    plt.close()
+
+    plt.figure()
+    plt.plot(REWARD)
+    plt.xlabel('Episode')
+    plt.ylabel('Reward')
+    plt.title('Evolution of reward during training')
+    figure_save_path = os.path.join(run_folder, "reward_plot.png")
     plt.savefig(figure_save_path)
     plt.close()
 

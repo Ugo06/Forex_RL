@@ -77,7 +77,7 @@ class PrepareData:
     
     def normalize(self):
         self.norm_data = self.data.copy()
-        for i in range(np.shape(self.data)[1]):
+        for i in range(1,np.shape(self.data)[1]):
             maximum = np.max(self.data[:,i])
             minimum = np.min(self.data[:,i])
             if maximum-minimum == 0:

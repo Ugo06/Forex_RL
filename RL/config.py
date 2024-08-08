@@ -27,10 +27,13 @@ def main(args):
             'include_price': str2bool(args.include_price),
             'include_historic_position': str2bool(args.include_historic_position),
             'include_historic_action': str2bool(args.include_historic_action),
-            'include_historic_wallet': str2bool(args.include_historic_wallet)
+            'include_historic_wallet': str2bool(args.include_historic_wallet),
+            'include_historic_orders': str2bool(args.include_historic_orders)
         },
         "WALLET":args.wallet,
         "REWARD_FUNCTION":args.reward_function,
+        "ZETA":args.zeta,
+        "BETA":args.beta,
         "TYPE":args.type,
         "CONFIG_LAYER": args.config_layer,
         "EPSILON": args.epsilon,
@@ -73,7 +76,10 @@ if __name__ == "__main__":
     parser.add_argument('--include_historic_position', type=str, default='False')
     parser.add_argument('--include_historic_action', type=str, default='False')
     parser.add_argument('--include_historic_wallet', type=str, default='False')
+    parser.add_argument('--include_historic_orders', type=str, default='False')
     parser.add_argument('--reward_function',type=str,default='default')
+    parser.add_argument('--zeta',type=float,default=1)
+    parser.add_argument('--beta',type=float,default=1)
     parser.add_argument('--wallet',type=int,default=0)
     parser.add_argument('--type', type=str, default='lstm')
     parser.add_argument('--config_layer', type=None, default=[64, 8])
