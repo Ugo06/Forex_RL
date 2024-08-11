@@ -187,7 +187,7 @@ class TradingEnv(Order):
             elif reward_function == 'sortino_reward':
                 return self.sortino_ratio_reward
             elif reward_function == 'mean_return':
-                return self.mean_return_reward
+                return self.mean_reward
             elif reward_function == 'sharpe_ratio':
                 return self.sharpe_ratio_reward
             elif reward_function == 'long_term_0':
@@ -242,11 +242,10 @@ class TradingEnv(Order):
     
     def mean_reward(self):
         returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
-        returns = returns[-self.window_size:]
+        returns = returns[-5:]
         if not returns:
             return 0
         mean_return = np.mean(returns)
-        std_return = np.std(returns)
         if len(self.orders) == 0:
             duration = 1
         else:
@@ -258,14 +257,12 @@ class TradingEnv(Order):
                     duration.append(self.current_step-order.start_date)
             duration = np.mean(duration)
 
-        reward = (mean_return / std_return)*self.zeta - self.beta/duration 
-        if reward >100:
-            reward = 100
+        reward = self.zeta*mean_return*log(duration+1)
         return reward
     
     def sharpe_ratio_reward(self):
         returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
-        returns = returns[-self.window_size:]
+        returns = returns[-5:]
         if not returns:
             return 0
         mean_return = np.mean(returns)
