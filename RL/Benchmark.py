@@ -176,8 +176,55 @@ def main(config):
     print('All configurations tested and results saved.')
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config_path', type=str, required=True)
-    args = parser.parse_args()
-    config = load_config(args.config_path)
-    main(config)
+    first_layer = [16,32,64,128]
+    second_layer = [16,32,64,128]
+    path = "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\BENCHMARK\\AGENT\\MODEL\\"
+
+    for f_layer in first_layer:
+        for s_layer in second_layer :
+            run_id = [f_layer,s_layer]
+            config = {
+            "SAVE_DIR": path,
+            "RUN_ID": f"{run_id}",
+            "WINDOW_SIZE": 42,
+            "EPISODE_SIZE": 84,
+            "NB_EPISODE": 150,
+            "INITIAL_STEP": "random",
+            "N_TRAIN": 2,
+            "N_TEST": 1,
+            "MODE": {
+                "include_price": True,
+                "include_historic_position": True,
+                "include_historic_action": False,
+                "include_historic_wallet": False,
+                "include_historic_orders": True
+            },
+            "WALLET": 0,
+            "REWARD_FUNCTION": "mean_return",
+            "ZETA": 1.0,
+            "BETA": 1.0,
+            "TYPE": "lstm",
+            "CONFIG_LAYER": run_id,
+            "EPSILON": 1.0,
+            "EPSILON_MIN": 0.01,
+            "EPSILON_DECAY": 0.01**(1/150),
+            "BUFFER_SIZE": 15000,
+            "GAMMA": 0.99,
+            "ALPHA": 0.0001,
+            "BATCH_SIZE": 16,
+            "ITER_SAVE_MODEL_SCORE": 25,
+            "ITER_SAVE_TARGET_MODEL": 10,
+            "ITER_TEST": 4,
+            "FIGURE_TITLE": "Values of portfolio function of episodes",
+            "DATA_PATH": "C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/NOISY_FAKE_DATA_TRAIN.csv",
+            "MODEL_SAVE_PATH": os.path.join(path, f"config_{run_id}", 'model.keras'),
+            "SCORE_SAVE_PATH": os.path.join(path, f"config_{run_id}", 'scores.npy'),
+            "FIGURE_PATH": os.path.join(path, f"config_{run_id}", 'figure.png')
+            }
+            run_dir = os.path.join(path, f"config_{run_id}")
+            os.makedirs(run_dir, exist_ok=True)
+            
+            config_path = os.path.join(run_dir, 'config.json')
+            with open(config_path, 'w') as f:
+                json.dump(config, f, indent=4)
+            main(config)
