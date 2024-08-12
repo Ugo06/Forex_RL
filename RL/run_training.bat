@@ -36,7 +36,7 @@ python -m RL.config ^
   --zeta 1 ^
   --beta 1 ^
   --type "lstm"^
-  --config_layer "[64,16]" ^
+  --config_layer "[32,32]" ^
   --epsilon 1 ^
   --epsilon_decay "default" ^
   --epsilon_min 0.01 ^

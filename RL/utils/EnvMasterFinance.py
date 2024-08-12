@@ -247,7 +247,7 @@ class TradingEnv(Order):
             return 0
         mean_return = np.mean(returns)
         if len(self.orders) == 0:
-            duration = 1
+            duration = 0
         else:
             duration = []
             for order in self.orders:

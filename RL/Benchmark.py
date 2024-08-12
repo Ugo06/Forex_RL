@@ -188,7 +188,7 @@ if __name__ == "__main__":
             "RUN_ID": f"{run_id}",
             "WINDOW_SIZE": 42,
             "EPISODE_SIZE": 84,
-            "NB_EPISODE": 150,
+            "NB_EPISODE": 200,
             "INITIAL_STEP": "random",
             "N_TRAIN": 2,
             "N_TEST": 1,
