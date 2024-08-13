@@ -176,7 +176,7 @@ def main(config):
     print('All configurations tested and results saved.')
 
 if __name__ == "__main__":
-    first_layer = [16,32,64,128]
+    first_layer = [128]
     second_layer = [16,32,64,128]
     path = "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\BENCHMARK\\AGENT\\MODEL\\"
 
