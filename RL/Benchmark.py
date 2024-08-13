@@ -176,13 +176,13 @@ def main(config):
     print('All configurations tested and results saved.')
 
 if __name__ == "__main__":
-    first_layer = [128]
-    second_layer = [16,32,64,128]
-    path = "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\BENCHMARK\\AGENT\\MODEL\\"
+    buffer_size = [500,1000,5000,10000,20000]
+    batch_size = [4,16,64,512,2048]
+    path = "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\BENCHMARK\\AGENT\\HYPERPARAMETER\\"
 
-    for f_layer in first_layer:
-        for s_layer in second_layer :
-            run_id = [f_layer,s_layer]
+    for bas in batch_size:
+        for bus in buffer_size :
+            run_id = f"buffer_size_{bus}_batch_size_{bas}"
             config = {
             "SAVE_DIR": path,
             "RUN_ID": f"{run_id}",
@@ -204,14 +204,14 @@ if __name__ == "__main__":
             "ZETA": 1.0,
             "BETA": 1.0,
             "TYPE": "lstm",
-            "CONFIG_LAYER": run_id,
+            "CONFIG_LAYER": [128,128],
             "EPSILON": 1.0,
             "EPSILON_MIN": 0.01,
             "EPSILON_DECAY": 0.01**(1/150),
-            "BUFFER_SIZE": 15000,
+            "BUFFER_SIZE": bus,
             "GAMMA": 0.99,
             "ALPHA": 0.0001,
-            "BATCH_SIZE": 16,
+            "BATCH_SIZE": bas,
             "ITER_SAVE_MODEL_SCORE": 25,
             "ITER_SAVE_TARGET_MODEL": 10,
             "ITER_TEST": 4,
