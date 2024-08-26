@@ -20,8 +20,9 @@ def main(config):
     run_folder = os.path.join(config['SAVE_DIR'], f"config_{config['RUN_ID']}")
     
     # Load dataset
-    dataset = pd.read_csv(config['DATA_PATH']).to_numpy()
+    dataset = pd.read_csv(filepath_or_buffer=config['DATA_PATH'],index_col=0).to_numpy()
     data = PrepareData(dataset)
+    print(pd.DataFrame(data.data).head())
     data.normalize()
     dataset = data.norm_data
 

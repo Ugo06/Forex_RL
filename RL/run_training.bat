@@ -20,10 +20,10 @@ REM Run the config script to save the configuration
 python -m RL.config ^
   --run_id %RUN_ID% ^
   --save_dir %SAVE_DIR% ^
-  --window_size 42 ^
-  --episode_size 84 ^
-  --nb_episode 100 ^
-  --initial_step "random" ^
+  --window_size 40 ^
+  --episode_size 90 ^
+  --nb_episode 200 ^
+  --initial_step "sequential" ^
   --n_train 2 ^
   --n_test 1 ^
   --include_price "True" ^
@@ -36,11 +36,11 @@ python -m RL.config ^
   --zeta 1 ^
   --beta 1 ^
   --type "lstm"^
-  --config_layer "[32,32]" ^
+  --config_layer "[128,128]" ^
   --epsilon 1 ^
   --epsilon_decay "default" ^
   --epsilon_min 0.01 ^
-  --buffer_size 15000 ^
+  --buffer_size 5000 ^
   --gamma 0.99 ^
   --alpha 1e-4 ^
   --batch_size 16 ^
@@ -48,7 +48,7 @@ python -m RL.config ^
   --iter_save_target_model 10 ^
   --iter_test 4 ^
   --figure_title "Values of portfolio function of episodes" ^
-  --data_path "C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/NOISY_FAKE_DATA_TRAIN.csv"
+  --data_path "C:/Users/Ugo/Documents/AI/Forex_ML/DATA/DATASET_3/DATASET_V.csv"
 
 REM Run the MasterFinance script using the saved configuration
 python -m RL.MasterFinance --config_path "%SAVE_DIR%\config_%RUN_ID%\config.json"

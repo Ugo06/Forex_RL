@@ -176,18 +176,18 @@ def main(config):
     print('All configurations tested and results saved.')
 
 if __name__ == "__main__":
-    buffer_size = [500,1000,5000,10000,20000]
-    batch_size = [4,16,64,512,2048]
-    path = "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\BENCHMARK\\AGENT\\HYPERPARAMETER\\"
+    window_size= [1,5,20,60,90,250]
+    episode_size = [20,60,90,250]
+    path = "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\BENCHMARK\\ENV\\"
 
-    for bas in batch_size:
-        for bus in buffer_size :
-            run_id = f"buffer_size_{bus}_batch_size_{bas}"
+    for es in episode_size:
+        for ws in window_size :
+            run_id = f"episode_size_{es}_window_size_{ws}"
             config = {
             "SAVE_DIR": path,
             "RUN_ID": f"{run_id}",
-            "WINDOW_SIZE": 42,
-            "EPISODE_SIZE": 84,
+            "WINDOW_SIZE": ws,
+            "EPISODE_SIZE": es,
             "NB_EPISODE": 200,
             "INITIAL_STEP": "random",
             "N_TRAIN": 2,
@@ -207,11 +207,11 @@ if __name__ == "__main__":
             "CONFIG_LAYER": [128,128],
             "EPSILON": 1.0,
             "EPSILON_MIN": 0.01,
-            "EPSILON_DECAY": 0.01**(1/150),
-            "BUFFER_SIZE": bus,
+            "EPSILON_DECAY": 0.01**(1/200),
+            "BUFFER_SIZE": 5000,
             "GAMMA": 0.99,
             "ALPHA": 0.0001,
-            "BATCH_SIZE": bas,
+            "BATCH_SIZE": 16,
             "ITER_SAVE_MODEL_SCORE": 25,
             "ITER_SAVE_TARGET_MODEL": 10,
             "ITER_TEST": 4,
