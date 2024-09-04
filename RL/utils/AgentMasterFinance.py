@@ -51,11 +51,9 @@ class DQNTrader:
                 x = LSTM(lstm_layer[1], return_sequences=True, stateful=False)(x)
             else:
                 x = LSTM(lstm_layer[1], return_sequences=False, stateful=False)(x)
-        dense_layer1 = Dense(16, activation='elu')(x)
+        dense_layer1 = Dense(4, activation='linear')(x)
         dropout_layer1 = Dropout(0.5)(dense_layer1)
-        dense_layer2 = Dense(4, activation='elu')(dropout_layer1)
-        dropout_layer2 = Dropout(0.5)(dense_layer2)
-        output_q_values = Dense(self.action_size, activation='linear')(dropout_layer2)
+        output_q_values = Dense(self.action_size, activation='linear')(dropout_layer1)
 
         model = Model(inputs=input_state, outputs=output_q_values)
         model.compile(loss='mse', optimizer=Adam(learning_rate=self.alpha), metrics=['accuracy'])
@@ -138,3 +136,14 @@ class DQNTrader:
 
     def update_target_model(self):
         self.target_model.set_weights(self.model.get_weights())
+
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        print(f"Using GPU: {gpus}")
+    except RuntimeError as e:
+        print(e)
+else:
+    print("No GPU found. Using CPU.")

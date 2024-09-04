@@ -17,6 +17,7 @@ def main(args):
     config = {
         "SAVE_DIR": args.save_dir,
         "RUN_ID": args.run_id,
+        "NB_ACTION":args.nb_action,
         "WINDOW_SIZE": args.window_size,
         "EPISODE_SIZE": args.episode_size,
         "NB_EPISODE": args.nb_episode,
@@ -66,6 +67,7 @@ if __name__ == "__main__":
     # Add arguments from config.py
     parser.add_argument('--run_id', type=str, required=True)
     parser.add_argument('--save_dir', type=str, required=True)
+    parser.add_argument('--nb_action', type=int, default=3)
     parser.add_argument('--window_size', type=int, default=21)
     parser.add_argument('--episode_size', type=int, default=84)
     parser.add_argument('--nb_episode', type=int, default=200)

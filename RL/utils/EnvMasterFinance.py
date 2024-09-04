@@ -5,14 +5,14 @@ from math import log
 from utils.tools import Order
 
 class TradingEnv(Order):
-    def __init__(self, data: np.array, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: None = 'random', mode: dict = None,wallet:int=0, reward_function: str = "default",zeta:float=1,beta:float=1):
+    def __init__(self, data: np.array,nb_action:int=3, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: None = 'random', mode: dict = None,wallet:int=0, reward_function: str = "default",zeta:float=1,beta:float=1):
         
         self.data = data
 
         self.n = n
         self.episode_size = episode_size
         self.window_size = window_size
-        self.action_size = 3
+        self.action_size = nb_action
         self.reward_function = self._get_reward_function(reward_function=reward_function)
 
         self.mode = mode if mode is not None else {
@@ -96,7 +96,7 @@ class TradingEnv(Order):
     def step(self, action):
         if self.done:
             raise ValueError("The episode is already done. Call reset() to start a new episode.")
-
+        
         if self.position == 0:
             self._open_position(action)
         elif self.position == 1:
@@ -157,7 +157,7 @@ class TradingEnv(Order):
     def _update_historics(self,action:int,position:int):
         current_price = self.data[self.current_step][0]
         previous_price = self.data[self.current_step - 1][0]
-        self.wallet += self.position * (current_price - previous_price) / 0.001
+        self.wallet += self.position * (current_price - previous_price)/0.001
         
         if len(self.orders) == 0:
             value_order = 0
@@ -174,7 +174,7 @@ class TradingEnv(Order):
 
     def _get_reward_function(self,reward_function:str):
         if type(reward_function) == str:
-            if reward_function == 'initial_wallet':
+            if reward_function == 'default_return':
                 return self.default_reward
             elif reward_function == 'portfolio':
                 return self.reward_on_PF

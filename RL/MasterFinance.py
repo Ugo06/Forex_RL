@@ -34,8 +34,8 @@ def main(config):
         'include_historic_wallet': config['MODE']['include_historic_wallet'],
         'include_historic_orders': config['MODE']['include_historic_orders'],
     }
-    env = TradingEnv(data=dataset, window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TRAIN'], mode=mode, reward_function=config['REWARD_FUNCTION'],wallet=config['WALLET'],zeta=config['ZETA'],beta=config['BETA'])
-    env_test = TradingEnv(data=dataset, window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TEST'], mode=mode, reward_function=config['REWARD_FUNCTION'],wallet=config['WALLET'],zeta=config['ZETA'],beta=config['BETA'])
+    env = TradingEnv(data=dataset,nb_action=config['NB_ACTION'], window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TRAIN'], mode=mode, reward_function=config['REWARD_FUNCTION'],wallet=config['WALLET'],zeta=config['ZETA'],beta=config['BETA'])
+    env_test = TradingEnv(data=dataset,nb_action=config['NB_ACTION'], window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TEST'], mode=mode, reward_function=config['REWARD_FUNCTION'],wallet=config['WALLET'],zeta=config['ZETA'],beta=config['BETA'])
 
     # Initialize agent
     agent = DQNTrader(
