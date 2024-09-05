@@ -1,6 +1,6 @@
 {
     "SAVE_DIR": "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS",
-    "RUN_ID": "20240905_1046",
+    "RUN_ID": "20240905_1108",
     "NB_ACTION": 3,
     "WINDOW_SIZE": 40,
     "EPISODE_SIZE": 90,
@@ -36,7 +36,7 @@
     "ITER_TEST": 4,
     "FIGURE_TITLE": "Values of portfolio function of episodes",
     "DATA_PATH": "C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/NOISY_FAKE_DATA_TRAIN.csv",
-    "MODEL_SAVE_PATH": "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\config_20240905_1046\\model.keras",
-    "SCORE_SAVE_PATH": "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\config_20240905_1046\\scores.npy",
-    "FIGURE_PATH": "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\config_20240905_1046\\figure.png"
+    "MODEL_SAVE_PATH": "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\config_20240905_1108\\model.keras",
+    "SCORE_SAVE_PATH": "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\config_20240905_1108\\scores.npy",
+    "FIGURE_PATH": "C:\\Users\\Ugo\\Documents\\AI\\Forex_ML\\RL\\RESULTS\\config_20240905_1108\\figure.png"
 }

@@ -398,9 +398,9 @@ class TradingEnv(Order):
         for order in self.orders:
             start_time = order.start_date - self.initial_step + self.window_size - 1
             end_time = order.end_date - self.initial_step + self.window_size - 1
-            position_open[start_time:end_time] = [start_time]*(end_time-start_time)
+            position_open[end_time] = start_time
             position_close[end_time] = end_time
-            position_type[start_time:end_time] = [order.order_type]*(end_time-start_time)
+            position_type[end_time] = order.order_type
 
         agent_log['position_open'] = position_open
         agent_log['position_close'] = position_close
@@ -442,7 +442,6 @@ class TradingEnv(Order):
 
                     
                 if pd.notna(pos_open) and pd.notna(pos_close):
-
                     open_time = pos_open
                     close_time = pos_close
                     open_price = agent_log[agent_log['time'] == open_time]['price'].values[0]
@@ -451,13 +450,15 @@ class TradingEnv(Order):
 
                     # Plot buy (green) and sell (red) points and line for position held
                     if open_action == 1:  # Buy
-                        ax.plot(open_time, open_price, '^g', markersize=8, label="Buy")
-                        ax.plot([open_time, close_time], [open_price, close_price], 'g-', label="Long Position",linewidth=5)
-                        ax.plot(close_time, close_price, 'yo', markersize=8, label="Close")
+                        ax.plot(open_time, open_price*0.9995, marker='$↑$', color='green', markersize=15, label="Buy")
+                        ax.plot(open_time, open_price, 'go', markersize=4)
+                        ax.plot([open_time, close_time], [open_price, close_price], 'g-', label="Long Position",linewidth=3)
+                        ax.plot(close_time, close_price, 'yo', markersize=4, label="Close")
                     elif open_action == -1:  # Sell
-                        ax.plot(open_time, open_price, 'vr', markersize=8, label="Sell")
-                        ax.plot([open_time, close_time], [open_price, close_price], 'r-', label="Short Position",linewidth=5)
-                        ax.plot(close_time, close_price, 'yo', markersize=8, label="Close")
+                        ax.plot(open_time, open_price*1.0005, marker='$↓$', color='red', markersize=15, label="Sell")
+                        ax.plot(open_time, open_price, 'ro', markersize=4)
+                        ax.plot([open_time, close_time], [open_price, close_price], 'r-', label="Short Position",linewidth=3)
+                        ax.plot(close_time, close_price, 'yo', markersize=4, label="Close")
 
                     # Plot the closing point as a yellow point
                     
