@@ -15,7 +15,7 @@ class News:
         while value > 3 or value < -3 or value ==0:
             value = round(rd.normalvariate(0, 1.5))
         duration = abs(round(rd.normalvariate(5,2)))
-        while duration <4 :
+        while duration <0 :
             duration = abs(round(rd.normalvariate(5,5)))
         self.value = value
         self.duration = duration
@@ -55,18 +55,25 @@ class StockMarket(News) :
             if abs(news_item.edit-self.iter)>news_item.duration:
                 news_item.generate_random_news(self.iter)
         for i,news_item in enumerate(self.news):
-            noise = rd.normalvariate(0, 0.0015)
+            noise = rd.normalvariate(0, 0.00065)
             #if abs(noise)>0.001:
                 #noise = rd.normalvariate(0, 0.001)
             self.price = self.price + 0.001 *self.ponderation[i] *news_item.value
-            self.n_price = self.price + noise
+            event = int(rd.normalvariate(2, 7))
+            while event < 2 or event>5:
+                event = int(rd.normalvariate(2, 7))
+
+            if self.iter%event==0:
+                self.n_price = self.price + noise
+            else:
+                self.n_price = self.price
         self.news_history.append([news_item.value for news_item in self.news])
         self.price_history.append(self.price)
         self.n_price_history.append(self.n_price)
         self.iter += 1
 
     def run(self, nb_tour):
-        for _ in range(nb_tour):
+        for i in range(nb_tour):
             self.step()
     
     def generate(self,size):
@@ -74,10 +81,10 @@ class StockMarket(News) :
         while not r:
             
             self.run(size)
-            plt.plot(self.price_history)
+            plt.plot(self.price_history[:4000])
             plt.show()
-            plt.plot(self.price_history[0:365])
-            plt.plot(self.n_price_history[0:365])
+            #plt.plot(self.price_history[:250])
+            plt.plot(self.n_price_history[:250])
             plt.show()
             response = input('Is the genrated data okay for you?(y/n)')
             if response == 'y':
@@ -109,7 +116,7 @@ class StockMarket(News) :
 
 size = 40000
 
-SM = StockMarket(10)
+SM = StockMarket(50)
 SM.generate(size)
 
 

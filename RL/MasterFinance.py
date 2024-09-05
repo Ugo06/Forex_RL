@@ -20,7 +20,7 @@ def main(config):
     run_folder = os.path.join(config['SAVE_DIR'], f"config_{config['RUN_ID']}")
     
     # Load dataset
-    dataset = pd.read_csv(filepath_or_buffer=config['DATA_PATH'],index_col=0).to_numpy()
+    dataset = pd.read_csv(filepath_or_buffer=config['DATA_PATH']).to_numpy()
     data = PrepareData(dataset)
     print(pd.DataFrame(data.data).head())
     data.normalize()
@@ -93,6 +93,8 @@ def main(config):
                     agent.target_model.save(model_save_path)
                     score_save_path = os.path.join(run_folder, f"train_scores_episode_{episode}.npy")
                     np.save(score_save_path, train_scores)
+                    video_save_path = os.path.join(run_folder,f'agent_trading_episode_{episode}.mp4')
+                    env._render_agent_actions(video_save_path)
                 
                 train_scores.append(env.wallet)
                 nb_order.append(len(env.orders))

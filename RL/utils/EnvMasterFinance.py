@@ -1,5 +1,8 @@
 import numpy as np
 import random as rd
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 from math import log
 from utils.tools import Order
@@ -46,7 +49,7 @@ class TradingEnv(Order):
         self.wallet = self.initial_wallet
 
         self.historic_position = np.zeros((self.window_size, 1))
-        self.historic_action = np.full((self.window_size, 1), 0)
+        self.historic_action = np.full((self.window_size, 1), 2)
         self.historic_wallet = np.full((self.window_size, 1), self.wallet)
         self.historic_orders = np.full((self.window_size,1),0)
 
@@ -80,7 +83,7 @@ class TradingEnv(Order):
         self.position = 0
         
         self.historic_position = np.zeros((self.window_size, 1))
-        self.historic_action = np.full((self.window_size, 1), 0)
+        self.historic_action = np.full((self.window_size, 1), 2)
         self.historic_wallet = np.full((self.window_size, 1), self.wallet)
         self.historic_orders = np.full((self.window_size,1),0)
 
@@ -374,4 +377,102 @@ class TradingEnv(Order):
             return np.hstack((data_state, additional_features))
         else:
             return data_state
+    
+    def _render_agent_actions(self, save_as):
+        fig, ax = plt.subplots()
+        data = self.data[self.initial_step-self.window_size:self.current_step, 0]
 
+        # Create a DataFrame to store the agent's actions
+        agent_log = pd.DataFrame({
+            'time': [t for t in range(len(data))],
+            'price': data,
+        })
+
+        # Initialize position_open and position_close with NaN values
+        position_open = [np.nan for _ in agent_log['time']]
+        position_close = [np.nan for _ in agent_log['time']]
+        position_type = [np.nan for _ in agent_log['time']]
+
+        # Log the open and close positions based on the orders
+
+        for order in self.orders:
+            start_time = order.start_date - self.initial_step + self.window_size - 1
+            end_time = order.end_date - self.initial_step + self.window_size - 1
+            position_open[end_time] = start_time
+            position_close[end_time] = end_time
+            position_type[end_time] = order.order_type
+
+        agent_log['position_open'] = position_open
+        agent_log['position_close'] = position_close
+        agent_log['action'] = position_type
+
+        # Create market data DataFrame
+        market_data = pd.DataFrame({
+            'time': [t for t in range(len(data))],
+            'price': data
+        })
+
+        time_steps = market_data['time']
+        prices = market_data['price']
+
+        # Initialize lists for the plot
+        xdata, ydata = [], []
+
+        # Initialize the market price line
+        ln, = ax.plot([], [], 'b-', animated=True, label='Market Price')
+        i = 0
+        def init():
+            ax.set_xlim(min(time_steps), max(time_steps))
+            ax.set_ylim(min(prices) * 0.99, max(prices) * 1.01)
+            ax.set_title("Agent Trading Actions with Positions Duration")
+            ax.set_xlabel("Time")
+            ax.set_ylabel("Price (EUR/USD)")
+            return ln,
+
+        def update(frame):
+            xdata.append(time_steps.iloc[frame])
+            ydata.append(prices.iloc[frame])
+            ln.set_data(xdata, ydata)
+
+            if frame in agent_log['time'].values:
+                current_action = agent_log[agent_log['time'] == frame].iloc[0]
+                pos_open = current_action['position_open']
+                pos_close = current_action['position_close']
+
+                # If both position_open and position_close exist, plot the position
+                
+                if pd.notna(pos_open) and pd.notna(pos_close):
+
+                    open_time = pos_open
+                    close_time = pos_close
+                    open_price = agent_log[agent_log['time'] == open_time]['price'].values[0]
+                    close_price = agent_log[agent_log['time'] == close_time]['price'].values[0]
+                    open_action = agent_log[agent_log['time'] == close_time]['action'].values[0]
+
+                    # Plot buy (green) and sell (red) points and line for position held
+                    if open_action == 1:  # Buy
+                        ax.plot(open_time, open_price, '^g', markersize=8, label="Buy")
+                        ax.plot([open_time, close_time], [open_price, close_price], 'g-', label="Long Position",linewidth=5)
+                        ax.plot(close_time, close_price, 'yo', markersize=8, label="Close")
+                    elif open_action == -1:  # Sell
+                        ax.plot(open_time, open_price, 'vr', markersize=8, label="Sell")
+                        ax.plot([open_time, close_time], [open_price, close_price], 'r-', label="Short Position",linewidth=5)
+                        ax.plot(close_time, close_price, 'yo', markersize=8, label="Close")
+
+                    # Plot the closing point as a yellow point
+                    
+
+            return ln,
+
+        # Create the animation
+        ani = animation.FuncAnimation(
+            fig, update, frames=range(len(time_steps)),
+            init_func=init, blit=True, repeat=False
+        )
+
+        # Save the animation
+        ani.save(save_as, writer='ffmpeg')
+        print(f"Video saved: {save_as}")
+
+        # Close the figure to avoid memory issues
+        plt.close(fig)
