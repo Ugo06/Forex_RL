@@ -22,6 +22,7 @@ def main(args):
         "EPISODE_SIZE": args.episode_size,
         "NB_EPISODE": args.nb_episode,
         "INITIAL_STEP": args.initial_step,
+        "PAS":args.pas,
         "N_TRAIN": args.n_train,
         "N_TEST": args.n_test,
         "MODE": {
@@ -72,6 +73,7 @@ if __name__ == "__main__":
     parser.add_argument('--episode_size', type=int, default=84)
     parser.add_argument('--nb_episode', type=int, default=200)
     parser.add_argument('--initial_step', type=None, default='random')
+    parser.add_argument('--pas', type=int, default=1)
     parser.add_argument('--n_train', type=int, default=2)
     parser.add_argument('--n_test', type=int, default=1)
     parser.add_argument('--include_price', type=str, default='False')

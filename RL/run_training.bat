@@ -25,6 +25,7 @@ python -m RL.config ^
   --episode_size 90 ^
   --nb_episode 200 ^
   --initial_step "sequential" ^
+  --pas 40 ^
   --n_train 2 ^
   --n_test 1 ^
   --include_price "True" ^

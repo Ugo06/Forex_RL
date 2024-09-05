@@ -78,7 +78,7 @@ def main(config):
     progress_bar = tqdm(range(config['EPISODE_SIZE'] * config['NB_EPISODE']))
 
     for episode in range(1, config['NB_EPISODE'] + 1):
-        state = np.array([env.reset(initial_step=config['INITIAL_STEP'])])
+        state = np.array([env.reset(initial_step=config['INITIAL_STEP'],pas=config['PAS'])])
         total_reward = 0
         while True:
             action = agent.act(state)
@@ -98,7 +98,7 @@ def main(config):
                     agent.update_target_model()
 
                 if episode % config['ITER_TEST'] == 0:
-                    state_test = np.array([env_test.reset(env.current_step)])
+                    state_test = np.array([env_test.reset(env.current_step),config['PAS']])
                     done_test = False
                     while not done_test:
                         action_test = agent.act(state_test)

@@ -8,7 +8,18 @@ from math import log
 from utils.tools import Order
 
 class TradingEnv(Order):
-    def __init__(self, data: np.array,nb_action:int=3, window_size: int = 20, episode_size: int = 250, n: int = 1, initial_step: None = 'random', mode: dict = None,wallet:int=0, reward_function: str = "default",zeta:float=1,beta:float=1):
+    def __init__(self, 
+                 data: np.array,
+                 nb_action:int=3, 
+                 window_size: int = 20, 
+                 episode_size: int = 250, 
+                 n: int = 1, 
+                 initial_step: None = 'random',
+                 mode: dict = None,
+                 wallet:int=0, 
+                 reward_function: str = "default",
+                 zeta:float=1,
+                 beta:float=1):
         
         self.data = data
 
@@ -58,14 +69,16 @@ class TradingEnv(Order):
         self.zeta = zeta
         self.beta = beta
 
-    def reset(self, initial_step: None = 'random'):
+    def reset(self, 
+              initial_step: None = 'random',
+              pas:int=1):
         
         if type(initial_step) ==str:
             if initial_step == 'random':
                 self.initial_step = rd.randint(self.window_size, len(self.data) - (self.n * self.episode_size + 1))
             elif initial_step == 'sequential':
                 if self.initial_step<=len(self.data) - (self.n * self.episode_size + 1):
-                    self.initial_step += self.window_size
+                    self.initial_step += pas
                 else:
                     self.initial_step = self.window_size
         elif type(initial_step) == int:
