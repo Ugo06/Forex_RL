@@ -245,7 +245,7 @@ class TradingEnv(Order):
     
     def mean_reward(self):
         returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
-        returns = returns[-5:]
+        returns = returns[-10:]
         if not returns:
             return 0
         mean_return = np.mean(returns)
@@ -265,7 +265,7 @@ class TradingEnv(Order):
     
     def sharpe_ratio_reward(self):
         returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
-        returns = returns[-5:]
+        returns = returns[-10:]
         if not returns:
             return 0
         mean_return = np.mean(returns)
@@ -279,6 +279,7 @@ class TradingEnv(Order):
                     duration.append(order.end_date-order.start_date)
                 else:
                     duration.append(self.current_step-order.start_date)
+            
             duration = np.mean(duration)
 
         reward = (mean_return / std_return)*self.zeta - self.beta/duration if std_return != 0 else 0
