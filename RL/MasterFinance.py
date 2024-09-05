@@ -34,8 +34,26 @@ def main(config):
         'include_historic_wallet': config['MODE']['include_historic_wallet'],
         'include_historic_orders': config['MODE']['include_historic_orders'],
     }
-    env = TradingEnv(data=dataset,nb_action=config['NB_ACTION'], window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TRAIN'], mode=mode, reward_function=config['REWARD_FUNCTION'],wallet=config['WALLET'],zeta=config['ZETA'],beta=config['BETA'])
-    env_test = TradingEnv(data=dataset,nb_action=config['NB_ACTION'], window_size=config['WINDOW_SIZE'], episode_size=config['EPISODE_SIZE'], n=config['N_TEST'], mode=mode, reward_function=config['REWARD_FUNCTION'],wallet=config['WALLET'],zeta=config['ZETA'],beta=config['BETA'])
+    env = TradingEnv(data=dataset,nb_action=config['NB_ACTION'], 
+                     window_size=config['WINDOW_SIZE'], 
+                     episode_size=config['EPISODE_SIZE'],
+                     initial_step=config["INITIAL_STEP"],
+                     n=config['N_TRAIN'], 
+                     mode=mode, 
+                     reward_function=config['REWARD_FUNCTION'],
+                     wallet=config['WALLET'],
+                     zeta=config['ZETA'],
+                     beta=config['BETA'])
+    env_test = TradingEnv(data=dataset,
+                          nb_action=config['NB_ACTION'], 
+                          window_size=config['WINDOW_SIZE'], 
+                          episode_size=config['EPISODE_SIZE'],
+                          initial_step=config["INITIAL_STEP"], 
+                          n=config['N_TEST'], mode=mode, 
+                          reward_function=config['REWARD_FUNCTION'],
+                          wallet=config['WALLET'],
+                          zeta=config['ZETA'],
+                          beta=config['BETA'])
 
     # Initialize agent
     agent = DQNTrader(
@@ -60,7 +78,7 @@ def main(config):
     progress_bar = tqdm(range(config['EPISODE_SIZE'] * config['NB_EPISODE']))
 
     for episode in range(1, config['NB_EPISODE'] + 1):
-        state = np.array([env.reset()])
+        state = np.array([env.reset(initial_step=config['INITIAL_STEP'])])
         total_reward = 0
         while True:
             action = agent.act(state)
@@ -88,7 +106,7 @@ def main(config):
                         state_test = np.array([next_state_test])
                     test_scores.append(env_test.wallet)
 
-                if episode % config['ITER_SAVE_MODEL_SCORE'] == 0:
+                if episode % config['ITER_SAVE_MODEL_SCORE'] == 0 or episode==1:
                     model_save_path = os.path.join(run_folder, f"model_episode_{episode}.keras")
                     agent.target_model.save(model_save_path)
                     score_save_path = os.path.join(run_folder, f"train_scores_episode_{episode}.npy")

@@ -398,9 +398,9 @@ class TradingEnv(Order):
         for order in self.orders:
             start_time = order.start_date - self.initial_step + self.window_size - 1
             end_time = order.end_date - self.initial_step + self.window_size - 1
-            position_open[end_time] = start_time
+            position_open[start_time:end_time] = [start_time]*(end_time-start_time)
             position_close[end_time] = end_time
-            position_type[end_time] = order.order_type
+            position_type[start_time:end_time] = [order.order_type]*(end_time-start_time)
 
         agent_log['position_open'] = position_open
         agent_log['position_close'] = position_close
@@ -423,7 +423,7 @@ class TradingEnv(Order):
         i = 0
         def init():
             ax.set_xlim(min(time_steps), max(time_steps))
-            ax.set_ylim(min(prices) * 0.99, max(prices) * 1.01)
+            ax.set_ylim(min(prices) * 0.999, max(prices) * 1.001)
             ax.set_title("Agent Trading Actions with Positions Duration")
             ax.set_xlabel("Time")
             ax.set_ylabel("Price (EUR/USD)")
@@ -436,11 +436,11 @@ class TradingEnv(Order):
 
             if frame in agent_log['time'].values:
                 current_action = agent_log[agent_log['time'] == frame].iloc[0]
+                current_time = current_action['time']
                 pos_open = current_action['position_open']
                 pos_close = current_action['position_close']
 
-                # If both position_open and position_close exist, plot the position
-                
+                    
                 if pd.notna(pos_open) and pd.notna(pos_close):
 
                     open_time = pos_open
@@ -472,7 +472,7 @@ class TradingEnv(Order):
 
         # Save the animation
         ani.save(save_as, writer='ffmpeg')
-        print(f"Video saved: {save_as}")
+        print(f"Video saved")
 
         # Close the figure to avoid memory issues
         plt.close(fig)

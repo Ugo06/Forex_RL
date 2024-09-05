@@ -23,7 +23,7 @@ python -m RL.config ^
   --nb_action 3 ^
   --window_size 40 ^
   --episode_size 90 ^
-  --nb_episode 150 ^
+  --nb_episode 200 ^
   --initial_step "sequential" ^
   --n_train 2 ^
   --n_test 1 ^
