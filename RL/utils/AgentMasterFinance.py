@@ -1,12 +1,13 @@
 import numpy as np
 import tensorflow as tf
+
 import random
 from utils.tools import ReplayBuffer
 
 from tensorflow.keras.models import Sequential, Model, load_model
 from tensorflow.keras.layers import Dense, Flatten, Dropout, LSTM, Conv2D, MaxPooling2D,Reshape, Input
 from tensorflow.keras.optimizers import Adam
-
+from tensorflow.keras.regularizers import l2
 
 class DQNTrader:
     def __init__(self, state_size:int, 

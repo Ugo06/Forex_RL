@@ -20,7 +20,8 @@ def main(config):
     run_folder = os.path.join(config['SAVE_DIR'], f"config_{config['RUN_ID']}")
     
     # Load dataset
-    dataset = pd.read_csv(filepath_or_buffer=config['DATA_PATH']).to_numpy()
+    dataset = pd.read_csv(filepath_or_buffer=config['DATA_PATH'])
+    dataset = dataset.drop(['OPEN','SMA_5','SMA_50'],axis=1).to_numpy()
     data = PrepareData(dataset)
     print(pd.DataFrame(data.data).head())
     data.normalize()
@@ -98,7 +99,7 @@ def main(config):
                     agent.update_target_model()
 
                 if episode % config['ITER_TEST'] == 0:
-                    state_test = np.array([env_test.reset(env.current_step),config['PAS']])
+                    state_test = np.array([env_test.reset(env.current_step,config['PAS'])])
                     done_test = False
                     while not done_test:
                         action_test = agent.act(state_test)

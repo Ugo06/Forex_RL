@@ -40,7 +40,7 @@ def main(args):
         "CONFIG_LAYER": args.config_layer,
         "EPSILON": args.epsilon,
         "EPSILON_MIN": args.epsilon_min,
-        "EPSILON_DECAY": args.epsilon_min ** (1 / args.nb_episode) if args.epsilon_decay in 'default' else args.epsilon_decay,
+        "EPSILON_DECAY": args.epsilon_min ** (1 / args.nb_episode) if args.epsilon_decay in 'default' else float(args.epsilon_decay),
         "BUFFER_SIZE": args.buffer_size,
         "GAMMA": args.gamma,
         "ALPHA": args.alpha,

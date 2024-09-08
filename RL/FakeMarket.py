@@ -81,7 +81,7 @@ class StockMarket(News) :
         while not r:
             
             self.run(size)
-            plt.plot(self.price_history[:4000])
+            plt.plot(self.price_history)
             plt.show()
             #plt.plot(self.price_history[:250])
             plt.plot(self.n_price_history[:250])
@@ -97,8 +97,8 @@ class StockMarket(News) :
         Price = np.array(self.price_history)
         Price = np.reshape(Price,(size,1))
         DATASET_FAKE_MARKET = np.concatenate((Price,News),axis=1)
-        training = DATASET_FAKE_MARKET[:(size//4)*3]
-        test = DATASET_FAKE_MARKET[(size//4)*3:]
+        training = DATASET_FAKE_MARKET[:int(0.8*size)]
+        test = DATASET_FAKE_MARKET[int(0.8*size):]
         training = pd.DataFrame(training, columns=self.labels)
         test = pd.DataFrame(test, columns=self.labels)
         training.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/FAKE_DATA_TRAIN.csv',index=False)
@@ -114,7 +114,7 @@ class StockMarket(News) :
         n_training.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/NOISY_FAKE_DATA_TRAIN.csv',index=False)
         n_test.to_csv('C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/NOISY_TEST_FAKE_DATA_TEST.csv',index=False)
 
-size = 40000
+size = 30000
 
 SM = StockMarket(50)
 SM.generate(size)

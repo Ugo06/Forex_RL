@@ -257,11 +257,7 @@ class TradingEnv(Order):
                 return 0
     
     def mean_reward(self):
-        returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
-        returns = returns[-10:]
-        if not returns:
-            return 0
-        mean_return = np.mean(returns)
+
         if len(self.orders) == 0:
             duration = 0
         else:
@@ -272,19 +268,21 @@ class TradingEnv(Order):
                 else:
                     duration.append(self.current_step-order.start_date)
             duration = np.mean(duration)
+        
+        returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
+        returns = returns[-5:]
+        if not returns:
+            return 0
+        mean_return = np.mean(returns)
+        std_return = np.std(returns)
 
         reward = self.zeta*mean_return*log(duration+1)
         return reward
     
     def sharpe_ratio_reward(self):
-        returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
-        returns = returns[-10:]
-        if not returns:
-            return 0
-        mean_return = np.mean(returns)
-        std_return = np.std(returns)
+        
         if len(self.orders) == 0:
-            duration = 1
+            duration = 0
         else:
             duration = []
             for order in self.orders:
@@ -292,13 +290,17 @@ class TradingEnv(Order):
                     duration.append(order.end_date-order.start_date)
                 else:
                     duration.append(self.current_step-order.start_date)
-            
             duration = np.mean(duration)
+        
+        returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
+        returns = returns[-5:]
+        if not returns:
+            return 0
+        mean_return = np.mean(returns)
+        std_return = np.std(returns)
 
-        reward = (mean_return / std_return)*self.zeta - self.beta/duration if std_return != 0 else 0
-        if reward >100:
-            reward = 100
-        return reward
+        reward = self.zeta*mean_return*log(duration+1)
+        return reward/std_return if std_return != 0 else 0
     
     def sortino_ratio_reward(self):
         returns = [self.historic_wallet[i][0] - self.historic_wallet[i-1][0] for i in range(1, len(self.historic_wallet))]
@@ -324,7 +326,7 @@ class TradingEnv(Order):
         if current_profit >=max_profit:
             return 1
         elif current_profit >= 0.8 * max_profit and current_profit < max_profit:
-            return 1
+            return 0.5
         elif current_profit < 0.8 * max_profit and current_profit >=0:
             return 0
         else:
@@ -433,7 +435,7 @@ class TradingEnv(Order):
         xdata, ydata = [], []
 
         # Initialize the market price line
-        ln, = ax.plot([], [], 'b-', animated=True, label='Market Price')
+        ln, = ax.plot([], [], 'k-', animated=True, label='Market Price')
         i = 0
         def init():
             ax.set_xlim(min(time_steps), max(time_steps))
@@ -465,14 +467,20 @@ class TradingEnv(Order):
                     # Plot buy (green) and sell (red) points and line for position held
                     if open_action == 1:  # Buy
                         ax.plot(open_time, open_price*0.9995, marker='$↑$', color='green', markersize=15, label="Buy")
-                        ax.plot(open_time, open_price, 'go', markersize=4)
-                        ax.plot([open_time, close_time], [open_price, close_price], 'g-', label="Long Position",linewidth=3)
-                        ax.plot(close_time, close_price, 'yo', markersize=4, label="Close")
+                        ax.plot(open_time, open_price, 'go', markersize=5)
+                        if open_action*(close_price-open_price)>=0:
+                            ax.plot([open_time, close_time], [open_price, close_price], 'g--', label="Long Position",linewidth=3)
+                        else:
+                            ax.plot([open_time, close_time], [open_price, close_price], 'r--', label="Long Position",linewidth=3)
+                        ax.plot(close_time, close_price, 'yo', markersize=5, label="Close")
                     elif open_action == -1:  # Sell
                         ax.plot(open_time, open_price*1.0005, marker='$↓$', color='red', markersize=15, label="Sell")
-                        ax.plot(open_time, open_price, 'ro', markersize=4)
-                        ax.plot([open_time, close_time], [open_price, close_price], 'r-', label="Short Position",linewidth=3)
-                        ax.plot(close_time, close_price, 'yo', markersize=4, label="Close")
+                        ax.plot(open_time, open_price, 'go', markersize=5)
+                        if open_action*(close_price-open_price)>=0:
+                            ax.plot([open_time, close_time], [open_price, close_price], 'g--', label="short Position",linewidth=3)
+                        else:
+                            ax.plot([open_time, close_time], [open_price, close_price], 'r--', label="short Position",linewidth=3)
+                        ax.plot(close_time, close_price, 'yo', markersize=5, label="Close")
 
                     # Plot the closing point as a yellow point
                     
