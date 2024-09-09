@@ -85,7 +85,7 @@ if __name__ == "__main__":
     parser.add_argument('--reward_function',type=str,default='default')
     parser.add_argument('--zeta',type=float,default=1)
     parser.add_argument('--beta',type=float,default=1)
-    parser.add_argument('--split',type=int,efault=250)
+    parser.add_argument('--split',type=int,default=250)
     parser.add_argument('--wallet',type=int,default=0)
     parser.add_argument('--type', type=str, default='lstm')
     parser.add_argument('--config_layer', type=None, default=[64, 8])
