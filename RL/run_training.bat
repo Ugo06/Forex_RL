@@ -37,6 +37,7 @@ python -m RL.config ^
   --reward_function "sharpe_ratio" ^
   --zeta 1 ^
   --beta 1 ^
+  --split 250 ^
   --type "lstm"^
   --config_layer "[32,32]" ^
   --epsilon 1 ^

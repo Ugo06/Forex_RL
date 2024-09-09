@@ -26,6 +26,7 @@ def main(config):
     print(pd.DataFrame(data.data).head())
     data.normalize()
     dataset = data.norm_data
+    dataset = data.norm_data[:len(data.norm_data)-(config['SPLIT']+1)]
 
     # Initialize environments
     mode = {
@@ -113,6 +114,14 @@ def main(config):
                     # Save rolling mean for test scores
                     if len(test_scores) >= 10:
                         rolling_test_scores.append(np.mean(test_scores[-10:]))
+                
+                if episode % config['ITER_SAVE_MODEL_SCORE'] == 0 or episode==1:
+                    model_save_path = os.path.join(run_folder, f"model_episode_{episode}.keras")
+                    agent.target_model.save(model_save_path)
+                    score_save_path = os.path.join(run_folder, f"train_scores_episode_{episode}.npy")
+                    np.save(score_save_path, train_scores)
+                    video_save_path = os.path.join(run_folder,f'agent_trading_episode_{episode}.mp4')
+                    env._render_agent_actions(video_save_path)
 
                 # Save rolling mean for training scores
                 train_scores.append(env.wallet)
