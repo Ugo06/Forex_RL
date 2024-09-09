@@ -45,6 +45,7 @@ def main(config):
                      wallet=config['WALLET'],
                      zeta=config['ZETA'],
                      beta=config['BETA'])
+    
     env_test = TradingEnv(data=dataset,
                           nb_action=config['NB_ACTION'], 
                           window_size=config['WINDOW_SIZE'], 
@@ -74,6 +75,8 @@ def main(config):
     REWARD = []
     train_scores = []
     test_scores = []
+    rolling_train_scores = []
+    rolling_test_scores = []
     order_duration = []
     nb_order = []
     progress_bar = tqdm(range(config['EPISODE_SIZE'] * config['NB_EPISODE']))
@@ -107,27 +110,26 @@ def main(config):
                         state_test = np.array([next_state_test])
                     test_scores.append(env_test.wallet)
 
-                if episode % config['ITER_SAVE_MODEL_SCORE'] == 0 or episode==1:
-                    model_save_path = os.path.join(run_folder, f"model_episode_{episode}.keras")
-                    agent.target_model.save(model_save_path)
-                    score_save_path = os.path.join(run_folder, f"train_scores_episode_{episode}.npy")
-                    np.save(score_save_path, train_scores)
-                    video_save_path = os.path.join(run_folder,f'agent_trading_episode_{episode}.mp4')
-                    env._render_agent_actions(video_save_path)
-                
+                    # Save rolling mean for test scores
+                    if len(test_scores) >= 10:
+                        rolling_test_scores.append(np.mean(test_scores[-10:]))
+
+                # Save rolling mean for training scores
                 train_scores.append(env.wallet)
+                if len(train_scores) >= 10:
+                    rolling_train_scores.append(np.mean(train_scores[-10:]))
+
                 nb_order.append(len(env.orders))
                 duration = np.array([order.end_date-order.start_date for order in env.orders])
                 duration = np.mean(duration)
                 order_duration.append(duration)
                 REWARD.append(total_reward)
-                print("Épisode :", episode,"Récompense totale :", env.wallet)
-                print("nombre de position ouverte: ",len(env.orders),"Durée moyenne d'une position ouverte: ",duration)
+                print("Épisode :", episode, "Récompense totale :", env.wallet)
+                print("nombre de position ouverte: ", len(env.orders), "Durée moyenne d'une position ouverte: ", duration)
                 break
             
             if len(agent.memory.buffer) > config['BATCH_SIZE']:
                  agent.replay()
-
 
     print('Training completed and models saved.')
 
@@ -138,6 +140,8 @@ def main(config):
     np.save(score_save_path, train_scores)
     score_save_path = os.path.join(run_folder, "test_scores_final.npy")
     np.save(score_save_path, test_scores)
+    np.save(os.path.join(run_folder, "rolling_train_scores.npy"), rolling_train_scores)
+    np.save(os.path.join(run_folder, "rolling_test_scores.npy"), rolling_test_scores)
     duration_save_path = os.path.join(run_folder, "duration_opened_position.npy")
     np.save(duration_save_path, order_duration)
     number_save_path = os.path.join(run_folder, "number_opened_position.npy")
@@ -158,41 +162,16 @@ def main(config):
     plt.savefig(figure_save_path)
     plt.close()
 
+    # Plot rolling means
     plt.figure()
-    plt.plot(REWARD)
+    plt.plot(range(10, len(train_scores)+1), rolling_train_scores, label='Rolling Mean Training Score')
+    plt.plot(range(10, len(test_scores)+1), rolling_test_scores, label='Rolling Mean Test Score')
     plt.xlabel('Episode')
-    plt.ylabel('Reward')
-    plt.title('Evolution of reward during training')
-    figure_save_path = os.path.join(run_folder, "reward_plot.png")
-    plt.savefig(figure_save_path)
-    plt.close()
-
-    fig, ax1 = plt.subplots()
-
-    # Tracer order_duration sur l'axe y de gauche
-    ax1.set_xlabel('Episode')
-    ax1.set_ylabel('Mean duration of an opened position', color='tab:blue')
-    ax1.plot(X, order_duration, color='tab:blue', label='Mean duration of a opened position')
-    ax1.tick_params(axis='y', labelcolor='tab:blue')
-
-    # Créer un second axe y pour nb_order
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('Number of opened position', color='tab:red')
-    ax2.plot(X, nb_order, color='tab:red', label='Number of opened position')
-    ax2.tick_params(axis='y', labelcolor='tab:red')
-
-    # Ajouter la légende pour les deux axes
-    fig.tight_layout()  # Pour ajuster automatiquement la disposition
-    lines, labels = ax1.get_legend_handles_labels()
-    lines2, labels2 = ax2.get_legend_handles_labels()
-    ax1.legend(lines + lines2, labels + labels2, loc='upper left')
-
-    # Ajouter un titre
-    plt.title('Mean Duration of Opened Positions and Number of Opened Positions per Episode')
-
-    # Sauvegarder la figure
-    figure_save_path = os.path.join(run_folder, "time_order_plot.png")
-    plt.savefig(figure_save_path)
+    plt.ylabel('Rolling Mean Score (Window=10)')
+    plt.legend()
+    plt.title('Rolling Mean of Training and Test Scores')
+    rolling_figure_save_path = os.path.join(run_folder, "rolling_mean_scores_plot.png")
+    plt.savefig(rolling_figure_save_path)
     plt.close()
 
     print('All configurations tested and results saved.')

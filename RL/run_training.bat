@@ -23,8 +23,8 @@ python -m RL.config ^
   --nb_action 2 ^
   --window_size 40 ^
   --episode_size 90 ^
-  --nb_episode 200 ^
-  --initial_step "sequential" ^
+  --nb_episode 1000 ^
+  --initial_step "random" ^
   --pas 5 ^
   --n_train 2 ^
   --n_test 1 ^
@@ -38,7 +38,7 @@ python -m RL.config ^
   --zeta 1 ^
   --beta 1 ^
   --type "lstm"^
-  --config_layer "[64,32]" ^
+  --config_layer "[32,32]" ^
   --epsilon 1 ^
   --epsilon_decay "default" ^
   --epsilon_min 0.01 ^
@@ -48,7 +48,7 @@ python -m RL.config ^
   --batch_size 64 ^
   --iter_save_model_score 25 ^
   --iter_save_target_model 10 ^
-  --iter_test 4 ^
+  --iter_test 2 ^
   --figure_title "Values of portfolio function of episodes" ^
   --data_path "C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/DATASET_VI_SMA.csv"
 
