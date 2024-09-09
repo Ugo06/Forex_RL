@@ -27,7 +27,7 @@ def main(config):
     data = PrepareData(dataset)
     print(pd.DataFrame(data.data).head())
     data.normalize()
-    dataset = data.norm_data[len(data.norm_data)-(config['SPLIT']+config["N_TRAIN"]*config['EPISODE_SIZE']+1):]
+    dataset = data.norm_data[len(data.norm_data)-(config['SPLIT']+config["WINDOW_SIZE"]+config["N_TEST"]*config['EPISODE_SIZE']+1):]
 
     # Initialize environments
     mode = {

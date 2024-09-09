@@ -26,7 +26,7 @@ def main(config):
     print(pd.DataFrame(data.data).head())
     data.normalize()
     dataset = data.norm_data
-    dataset = data.norm_data[:len(data.norm_data)-(config['SPLIT']+1)]
+    dataset = data.norm_data[:len(data.norm_data)-(config['SPLIT'])]
 
     # Initialize environments
     mode = {
@@ -80,7 +80,9 @@ def main(config):
     rolling_test_scores = []
     order_duration = []
     nb_order = []
-    progress_bar = tqdm(range(config['EPISODE_SIZE'] * config['NB_EPISODE']))
+    X_rolling_train =[]
+    X_rolling_test =[]
+    progress_bar = tqdm(range(config['EPISODE_SIZE'] * config['NB_EPISODE']+(config['NB_EPISODE']//config['ITER_TEST'])*config['EPISODE_SIZE']))
 
     for episode in range(1, config['NB_EPISODE'] + 1):
         state = np.array([env.reset(initial_step=config['INITIAL_STEP'],pas=config['PAS'])])
@@ -109,11 +111,13 @@ def main(config):
                         action_test = agent.act(state_test)
                         next_state_test, reward_test, done_test, action_test, info = env_test.step(action_test)
                         state_test = np.array([next_state_test])
+                        progress_bar.update(1)
                     test_scores.append(env_test.wallet)
 
                     # Save rolling mean for test scores
-                    if len(test_scores) >= 10:
-                        rolling_test_scores.append(np.mean(test_scores[-10:]))
+                    if len(test_scores) >= 100:
+                        X_rolling_test.append(episode)
+                        rolling_test_scores.append(np.mean(test_scores[-2:]))
                 
                 if episode % config['ITER_SAVE_MODEL_SCORE'] == 0 or episode==1:
                     model_save_path = os.path.join(run_folder, f"model_episode_{episode}.keras")
@@ -125,8 +129,9 @@ def main(config):
 
                 # Save rolling mean for training scores
                 train_scores.append(env.wallet)
-                if len(train_scores) >= 10:
-                    rolling_train_scores.append(np.mean(train_scores[-10:]))
+                if len(train_scores) >= 100:
+                    X_rolling_train.append(episode)
+                    rolling_train_scores.append(np.mean(train_scores[-100:]))
 
                 nb_order.append(len(env.orders))
                 duration = np.array([order.end_date-order.start_date for order in env.orders])
@@ -172,9 +177,11 @@ def main(config):
     plt.close()
 
     # Plot rolling means
+
+    
     plt.figure()
-    plt.plot(range(10, len(train_scores)+1), rolling_train_scores, label='Rolling Mean Training Score')
-    plt.plot(range(10, len(test_scores)+1), rolling_test_scores, label='Rolling Mean Test Score')
+    plt.plot(X_rolling_train, rolling_train_scores, label='Rolling Mean Training Score')
+    plt.plot(X_rolling_test, label='Rolling Mean Test Score')
     plt.xlabel('Episode')
     plt.ylabel('Rolling Mean Score (Window=10)')
     plt.legend()

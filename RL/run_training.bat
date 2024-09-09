@@ -47,7 +47,7 @@ python -m RL.config ^
   --gamma 0.99 ^
   --alpha 1e-3 ^
   --batch_size 64 ^
-  --iter_save_model_score 25 ^
+  --iter_save_model_score 250 ^
   --iter_save_target_model 10 ^
   --iter_test 2 ^
   --figure_title "Values of portfolio function of episodes" ^
