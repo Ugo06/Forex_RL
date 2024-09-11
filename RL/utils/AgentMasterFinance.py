@@ -122,20 +122,28 @@ class DQNTrader:
         else:
             self.model.fit(_states, targets_2,epochs=1,verbose=0)
 
-    def pretrain_supervised(self, supervised_data, epochs=5, batch_size=32):
+    def pretrain_supervised(self, n, epochs=5):
         for _ in range(epochs):
-            _states = np.array([data[0] for data in supervised_data])
-            _target_actions = np.array([data[1] for data in supervised_data])
-            _rewards = np.array([data[2] for data in supervised_data])
-            _next_states = np.array([data[3] for data in supervised_data])
-            _dones = np.array([data[4] for data in supervised_data])
+            minibatch = self.memory.sample(n)
 
-            target_q_values = self.model.predict(_states, verbose=0)
-            next_q_values = self.model.predict(_next_states, verbose=0)
-            max_next_q_values = np.amax(next_q_values, axis=1)
+            _states = np.array([transition[0][0] for transition in minibatch])
+            _actions = np.array([transition[1] for transition in minibatch])
+            _rewards = np.array([transition[2] for transition in minibatch])
+            _next_states = np.array([transition[3][0] for transition in minibatch])
+            _dones = np.array([transition[4] for transition in minibatch])
 
-            target_q_values[range(len(_target_actions)), _target_actions] = _rewards + (1 - _dones) * self.gamma * max_next_q_values
-            self.model.fit(_states, target_q_values, epochs=1, batch_size=batch_size, verbose=1)
+            targets_1 = self.model.predict(_states, verbose=0)
+            next_q_values_1 = self.target_model.predict(_next_states, verbose=0)
+            targets_1[range(n), _actions] = _rewards + (1 - _dones) * self.gamma * np.amax(next_q_values_1, axis=1)
+            
+            targets_2 = self.target_model.predict(_states, verbose=0)
+            next_q_values_2 = self.model.predict(_next_states, verbose=0)
+            targets_2[range(n), _actions] = _rewards + (1 - _dones) * self.gamma * np.amax(next_q_values_2, axis=1)
+            
+            if random.choice([0,1])==0:
+                self.model.fit(_states, targets_1, epochs=1, verbose=0)
+            else:
+                self.model.fit(_states, targets_2,epochs=1,verbose=0)
 
     def update_target_model(self):
         self.target_model.set_weights(self.model.get_weights())

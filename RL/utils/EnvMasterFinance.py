@@ -321,16 +321,8 @@ class TradingEnv(Order):
 
         current_profit = position * (current_price - opening_price) / 0.001
 
-        max_profit = max([position*(self.data[i][0] - opening_price) / 0.001 for i in range(self.orders[-1].start_date, self.current_step + 1)])
-
-        if current_profit >=max_profit:
-            return 1
-        elif current_profit >= 0.8 * max_profit and current_profit < max_profit:
-            return 0.5
-        elif current_profit < 0.8 * max_profit and current_profit >=0:
-            return 0
-        else:
-            return -1
+        #max_profit = max([position*(self.data[i][0] - opening_price) / 0.001 for i in range(self.orders[-1].start_date, self.current_step)])
+        return current_profit
         
     def long_term_reward_1(self):
         if len(self.orders) == 0 or self.orders[-1].end_date != 0:

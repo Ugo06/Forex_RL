@@ -23,7 +23,7 @@ python -m RL.config ^
   --nb_action 2 ^
   --window_size 40 ^
   --episode_size 90 ^
-  --nb_episode 1000 ^
+  --nb_episode 200 ^
   --initial_step "random" ^
   --pas 5 ^
   --n_train 2 ^
@@ -34,7 +34,7 @@ python -m RL.config ^
   --include_historic_wallet "False" ^
   --include_historic_orders "True" ^
   --wallet 0 ^
-  --reward_function "sharpe_ratio" ^
+  --reward_function "long_term_0" ^
   --zeta 1 ^
   --beta 1 ^
   --split 250 ^
@@ -47,9 +47,9 @@ python -m RL.config ^
   --gamma 0.99 ^
   --alpha 1e-3 ^
   --batch_size 64 ^
-  --iter_save_model_score 250 ^
+  --iter_save_model_score 50 ^
   --iter_save_target_model 10 ^
-  --iter_test 2 ^
+  --iter_test 5 ^
   --figure_title "Values of portfolio function of episodes" ^
   --data_path "C:/Users/Ugo/Documents/AI/Forex_ML/RL/DATA/DATASET_VI_SMA.csv"
 

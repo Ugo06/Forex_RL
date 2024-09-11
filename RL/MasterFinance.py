@@ -181,13 +181,36 @@ def main(config):
     
     plt.figure()
     plt.plot(X_rolling_train, rolling_train_scores, label='Rolling Mean Training Score')
-    plt.plot(X_rolling_test, label='Rolling Mean Test Score')
+    plt.plot(X_rolling_test,rolling_test_scores, label='Rolling Mean Test Score')
     plt.xlabel('Episode')
     plt.ylabel('Rolling Mean Score (Window=10)')
     plt.legend()
     plt.title('Rolling Mean of Training and Test Scores')
     rolling_figure_save_path = os.path.join(run_folder, "rolling_mean_scores_plot.png")
     plt.savefig(rolling_figure_save_path)
+    plt.close()
+
+    fig, ax1 = plt.subplots()
+
+    ax1.set_xlabel('Episode')
+    ax1.set_ylabel('Mean duration of an opened position', color='tab:blue')
+    ax1.plot(X, order_duration, color='tab:blue', label='Mean duration of a opened position')
+    ax1.tick_params(axis='y', labelcolor='tab:blue')
+
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Number of opened position', color='tab:red')
+    ax2.plot(X, nb_order, color='tab:red', label='Number of opened position')
+    ax2.tick_params(axis='y', labelcolor='tab:red')
+
+    fig.tight_layout()
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc='upper left')
+
+    plt.title('Mean Duration of Opened Positions and Number of Opened Positions per Episode')
+
+    figure_save_path = os.path.join(run_folder, "time_order_plot.png")
+    plt.savefig(figure_save_path)
     plt.close()
 
     print('All configurations tested and results saved.')
