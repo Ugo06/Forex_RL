@@ -34,7 +34,7 @@ python -m RL.config ^
   --include_historic_wallet "False" ^
   --include_historic_orders "True" ^
   --wallet 0 ^
-  --reward_function "long_term_0" ^
+  --reward_function "mean_return" ^
   --zeta 1 ^
   --beta 1 ^
   --split 250 ^

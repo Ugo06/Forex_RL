@@ -5,30 +5,36 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 import argparse
+import streamlit as st
 
 from utils.tools import PrepareData
+from utils.streamlit_utils import apply_css
 from utils.AgentMasterFinance import DQNTrader
 from utils.EnvMasterFinance import TradingEnv
+
+if "is_running" not in st.session_state:
+    st.session_state.is_running = False
+
+if "stop_requested" not in st.session_state:
+    st.session_state.stop_requested = False
+
 
 def load_config(config_path):
     with open(config_path, 'r') as f:
         config = json.load(f)
     return config
 
-def main(config):
-    # Create the run directory
+def main(config,dataset,excluded_variable):
+    st.success("The Training is launched")
     run_folder = os.path.join(config['SAVE_DIR'], f"config_{config['RUN_ID']}")
     
-    # Load dataset
-    dataset = pd.read_csv(filepath_or_buffer=config['DATA_PATH'])
-    dataset = dataset.drop(['OPEN','SMA_5','SMA_50'],axis=1).to_numpy()
+    dataset = dataset.drop(excluded_variable,axis=1).to_numpy()
     data = PrepareData(dataset)
-    print(pd.DataFrame(data.data).head())
     data.normalize()
     dataset = data.norm_data
     dataset = data.norm_data[:len(data.norm_data)-(config['SPLIT'])]
 
-    # Initialize environments
+
     mode = {
         'include_price': config['MODE']['include_price'],
         'include_historic_position': config['MODE']['include_historic_position'],
@@ -82,9 +88,22 @@ def main(config):
     nb_order = []
     X_rolling_train =[]
     X_rolling_test =[]
-    progress_bar = tqdm(range(config['EPISODE_SIZE'] * config['NB_EPISODE']+(config['NB_EPISODE']//config['ITER_TEST'])*config['EPISODE_SIZE']))
+    
+    
+    progress_text = "Training in progress. Please wait."
+    progress_bar = st.progress(0, text=progress_text)
+    end_bar = config['EPISODE_SIZE'] * config['NB_EPISODE']+(config['NB_EPISODE']//config['ITER_TEST'])*config['EPISODE_SIZE']
+    progress = 0
+
+    bar = tqdm(range(config['EPISODE_SIZE'] * config['NB_EPISODE']+(config['NB_EPISODE']//config['ITER_TEST'])*config['EPISODE_SIZE']))
 
     for episode in range(1, config['NB_EPISODE'] + 1):
+
+        if st.session_state.stop_requested:
+            st.warning("Training has been stopped by the user.")
+            st.session_state.is_running = False
+            return
+        
         state = np.array([env.reset(initial_step=config['INITIAL_STEP'],pas=config['PAS'])])
         total_reward = 0
         while True:
@@ -95,8 +114,10 @@ def main(config):
             state = next_state
 
             total_reward += reward
-            progress_bar.update(1)
-
+            
+            progress +=1
+            progress_bar.progress(round(progress/end_bar,2))
+            bar.update(1)
             if done:
                 if agent.epsilon > agent.epsilon_min:
                     agent.epsilon *= agent.epsilon_decay
@@ -111,7 +132,10 @@ def main(config):
                         action_test = agent.act(state_test)
                         next_state_test, reward_test, done_test, action_test, info = env_test.step(action_test)
                         state_test = np.array([next_state_test])
-                        progress_bar.update(1)
+                        
+                        progress +=1
+                        progress_bar.progress(round(progress/end_bar,2))
+                        bar.update(1)
                     test_scores.append(env_test.wallet)
 
                     # Save rolling mean for test scores
@@ -124,6 +148,8 @@ def main(config):
                     agent.target_model.save(model_save_path)
                     score_save_path = os.path.join(run_folder, f"train_scores_episode_{episode}.npy")
                     np.save(score_save_path, train_scores)
+                    score_save_path = os.path.join(run_folder, f"test_scores_episode_{episode}.npy")
+                    np.save(score_save_path, test_scores)
                     video_save_path = os.path.join(run_folder,f'agent_trading_episode_{episode}.mp4')
                     env._render_agent_actions(video_save_path)
 
@@ -145,7 +171,7 @@ def main(config):
             if len(agent.memory.buffer) > config['BATCH_SIZE']:
                  agent.replay()
 
-    print('Training completed and models saved.')
+    
 
     # Save final scores
     model_save_path = os.path.join(run_folder, f"model_final.keras")
@@ -161,6 +187,8 @@ def main(config):
     number_save_path = os.path.join(run_folder, "number_opened_position.npy")
     np.save(number_save_path, nb_order)
 
+    st.success('Training completed and models saved.')
+    
     # Plot results
     X = np.arange(1, config['NB_EPISODE'] + 1)
     X_test = np.array([i for i in range(1, config['NB_EPISODE'] + 1) if i % config['ITER_TEST'] == 0])
@@ -213,11 +241,81 @@ def main(config):
     plt.savefig(figure_save_path)
     plt.close()
 
-    print('All configurations tested and results saved.')
+    st.success('All configurations tested and results saved.')
+    st.session_state.is_running = False
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config_path', type=str, required=True)
-    args = parser.parse_args()
-    config = load_config(args.config_path)
-    main(config)
+
+apply_css()
+
+
+st.markdown("<h1>Training Page</h1>", unsafe_allow_html=True)
+st.markdown("<p style='font-size:20px;'>This is the training page where you train the agent to trade on the forex markets.</p>", unsafe_allow_html=True)
+
+load_setup = st.selectbox('Do you prefer to load an existing configuration or set up the Agent?', ["Load", "Set up"])
+
+
+if load_setup == "Load":
+    config_path = st.text_input("Config File Path", value="")
+    if config_path:
+        try:
+            config = load_config(config_path)
+            st.success('Config file loaded successfully!')
+        except Exception as e:
+            st.warning('Enter a valid Config File Path!!', icon="⚠️")
+            config = None
+    else:
+        st.warning('Please provide a valid config file path.', icon="⚠️")
+        config = None
+else:
+    config = st.session_state.get("config", None)
+
+
+if config is None:
+    st.warning('Load or Set up the Trading Environment and Agent!!', icon="⚠️")
+else:
+
+    st.markdown("<h2 style='font-size:30px;'>Configuration used for the training</h2>", unsafe_allow_html=True)
+    st.session_state.config = config
+    st.json(st.session_state.config)
+
+    st.markdown("<h2 style='font-size:30px;'>Data used for the training</h2>", unsafe_allow_html=True)
+    try:
+        dataset = pd.read_csv(filepath_or_buffer=config['DATA_PATH'])
+        st.dataframe(dataset)
+    except Exception as e:
+        st.error(f"Error loading dataset: {e}")
+        dataset = None
+
+    if dataset is not None:
+        keys = list(dataset.keys())
+        st.session_state.options = st.multiselect(
+            "What variables do you want to exclude?",
+            keys
+        )
+    
+    st.markdown("<h2 style='font-size:30px;'>Ready for the training</h2>", unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Start Training"):
+            st.session_state.is_running = True
+            st.session_state.stop_requested = False 
+
+    with col2:
+        if st.button("Stop Training"):
+            st.session_state.stop_requested = True
+
+    if st.session_state.is_running:
+        try:
+            main(st.session_state.config,dataset, st.session_state.options)
+        except Exception as e:
+            st.error(e)
+            st.session_state.is_running = False
+
+
+
+
+
+
+    
