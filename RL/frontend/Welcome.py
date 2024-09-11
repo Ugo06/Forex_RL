@@ -12,7 +12,7 @@ apply_css()
 st.markdown("<h1 style='text-align: center; font-family: \"Times New Roman\", Times, serif;'>The Wall Street Master</h1>", unsafe_allow_html=True)
 
 # Load and display image
-image_path = os.path.join("C:/Users/Ugo/Documents/AI/Forex_ML/APPLICATION/frontend/images", "trading_bot.jpg")  # Update with your image path
+image_path = os.path.join("C:/Users/Ugo/Documents/AI/Forex_ML/RL/frontend/images", "trading_bot.jpg")  # Update with your image path
 
 left_co, cent_co,last_co = st.columns(3)
 
