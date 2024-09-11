@@ -1,9 +1,0 @@
-import numpy as np
-
-def create_dataset(dataset, time_step=1):
-    X, Y = [], []
-    for i in range(len(dataset) - time_step - 1):
-        X.append(dataset[i:(i + time_step), 0])
-        Y.append(dataset[i + time_step, 0])
-    return np.array(X), np.array(Y)
-
