@@ -458,7 +458,7 @@ class TradingEnv(Order):
 
                     # Plot buy (green) and sell (red) points and line for position held
                     if open_action == 1:  # Buy
-                        ax.plot(open_time, open_price*0.9995, marker='$↑$', color='green', markersize=15, label="Buy")
+                        ax.plot(open_time, open_price*0.994, marker='$↑$', color='green', markersize=15, label="Buy")
                         ax.plot(open_time, open_price, 'go', markersize=5)
                         if open_action*(close_price-open_price)>=0:
                             ax.plot([open_time, close_time], [open_price, close_price], 'g--', label="Long Position",linewidth=3)
@@ -466,7 +466,7 @@ class TradingEnv(Order):
                             ax.plot([open_time, close_time], [open_price, close_price], 'r--', label="Long Position",linewidth=3)
                         ax.plot(close_time, close_price, 'yo', markersize=5, label="Close")
                     elif open_action == -1:  # Sell
-                        ax.plot(open_time, open_price*1.0005, marker='$↓$', color='red', markersize=15, label="Sell")
+                        ax.plot(open_time, open_price*1.006, marker='$↓$', color='red', markersize=15, label="Sell")
                         ax.plot(open_time, open_price, 'go', markersize=5)
                         if open_action*(close_price-open_price)>=0:
                             ax.plot([open_time, close_time], [open_price, close_price], 'g--', label="short Position",linewidth=3)

@@ -18,6 +18,9 @@ if "is_running" not in st.session_state:
 if "stop_requested" not in st.session_state:
     st.session_state.stop_requested = False
 
+if "is_trained" not in st.session_state:
+    st.session_state.is_trained= False
+
 
 def load_config(config_path):
     with open(config_path, 'r') as f:
@@ -102,6 +105,7 @@ def main(config,dataset,excluded_variable):
         if st.session_state.stop_requested:
             st.warning("Training has been stopped by the user.")
             st.session_state.is_running = False
+            st.session_state.is_trained = False
             return
         
         state = np.array([env.reset(initial_step=config['INITIAL_STEP'],pas=config['PAS'])])
@@ -243,12 +247,13 @@ def main(config,dataset,excluded_variable):
 
     st.success('All configurations tested and results saved.')
     st.session_state.is_running = False
+    st.session_state.is_trained = True
 
 
 apply_css()
 
 
-st.markdown("<h1>Training Page</h1>", unsafe_allow_html=True)
+st.markdown("<h1>Learning Page</h1>", unsafe_allow_html=True)
 st.markdown("<p style='font-size:20px;'>This is the training page where you train the agent to trade on the forex markets.</p>", unsafe_allow_html=True)
 
 load_setup = st.selectbox('Do you prefer to load an existing configuration or set up the Agent?', ["Load", "Set up"])
@@ -312,6 +317,7 @@ else:
         except Exception as e:
             st.error(e)
             st.session_state.is_running = False
+            st.session_state.is_trained = False
 
 
 

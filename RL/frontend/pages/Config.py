@@ -4,6 +4,9 @@ import json
 import streamlit as st
 from utils.streamlit_utils import apply_css  # Import the function
 
+if "is_trained" not in st.session_state:
+    st.session_state.is_trained= False
+
 def load_config(config_path):
     with open(config_path, 'r') as f:
         config = json.load(f)
@@ -96,11 +99,11 @@ if config_path == "":
     initial_step = st.text_input("Initial Step (random or sequential)", "random")
     pas = st.number_input("Step", min_value=1, value=1)
 
-    include_price = st.selectbox("Include Price", ["True", "False"])
-    include_historic_position = st.selectbox("Include Historic Position", ["True", "False"])
-    include_historic_action = st.selectbox("Include Historic Action", ["True", "False"])
-    include_historic_wallet = st.selectbox("Include Historic Wallet", ["True", "False"])
-    include_historic_orders = st.selectbox("Include Historic Orders", ["True", "False"])
+    include_price = st.selectbox("Include Price?", ["Yes", "No"])
+    include_historic_position = st.selectbox("Include Historic Position?", ["Yes", "No"])
+    include_historic_action = st.selectbox("Include Historic Action?", ["Yes", "No"])
+    include_historic_wallet = st.selectbox("Include Historic Wallet?", ["Yes", "No"])
+    include_historic_orders = st.selectbox("Include Historic Orders?", ["Yes", "No"])
 
     st.markdown("<h1 style='font-size:20px;'>Initialisation of Reward Function</h1>", unsafe_allow_html=True)
     reward_function = st.text_input("Reward Function", "default")
@@ -180,3 +183,5 @@ if st.button("Sauvegarder la configuration"):
                 include_historic_orders, reward_function, zeta, beta, split, wallet, type_model, config_layer,
                 epsilon, epsilon_min, epsilon_decay, buffer_size, gamma, alpha, batch_size, iter_save_model_score,
                 iter_save_target_model, iter_test, figure_title, data_path)
+
+    st.session_state.is_trained = False
