@@ -252,12 +252,11 @@ def main(config,dataset,excluded_variable):
 
 apply_css()
 
-
 st.markdown("<h1>Learning Page</h1>", unsafe_allow_html=True)
 st.markdown("<p style='font-size:20px;'>This is the training page where you train the agent to trade on the forex markets.</p>", unsafe_allow_html=True)
 
+# Configuration loading or setup
 load_setup = st.selectbox('Do you prefer to load an existing configuration or set up the Agent?', ["Load", "Set up"])
-
 
 if load_setup == "Load":
     config_path = st.text_input("Config File Path", value="")
@@ -266,7 +265,7 @@ if load_setup == "Load":
             config = load_config(config_path)
             st.success('Config file loaded successfully!')
         except Exception as e:
-            st.warning('Enter a valid Config File Path!!', icon="⚠️")
+            st.warning(f"Error loading configuration: {e}")
             config = None
     else:
         st.warning('Please provide a valid config file path.', icon="⚠️")
@@ -274,15 +273,13 @@ if load_setup == "Load":
 else:
     config = st.session_state.get("config", None)
 
-
 if config is None:
-    st.warning('Load or Set up the Trading Environment and Agent!!', icon="⚠️")
+    st.warning('Load or Set up the Trading Environment and Agent!', icon="⚠️")
 else:
-
     st.markdown("<h2 style='font-size:30px;'>Configuration used for the training</h2>", unsafe_allow_html=True)
-    st.session_state.config = config
-    st.json(st.session_state.config)
+    st.json(config)
 
+    # Load and display dataset
     st.markdown("<h2 style='font-size:30px;'>Data used for the training</h2>", unsafe_allow_html=True)
     try:
         dataset = pd.read_csv(filepath_or_buffer=config['DATA_PATH'])
@@ -291,37 +288,38 @@ else:
         st.error(f"Error loading dataset: {e}")
         dataset = None
 
+    # Exclude variables from the dataset
     if dataset is not None:
         keys = list(dataset.keys())
-        st.session_state.options = st.multiselect(
-            "What variables do you want to exclude?",
-            keys
-        )
-    
+        st.session_state.options = st.multiselect("What variables do you want to exclude?", keys)
+
     st.markdown("<h2 style='font-size:30px;'>Ready for the training</h2>", unsafe_allow_html=True)
 
+    # Start/Stop buttons
     col1, col2 = st.columns(2)
 
     with col1:
         if st.button("Start Training"):
             st.session_state.is_running = True
-            st.session_state.stop_requested = False 
+            st.session_state.stop_requested = False
 
     with col2:
         if st.button("Stop Training"):
             st.session_state.stop_requested = True
 
+    # Run training if the button is clicked
     if st.session_state.is_running:
         try:
-            main(st.session_state.config,dataset, st.session_state.options)
+            config['EXCLUDED_VARIABLE'] = st.session_state.options
+            run_folder = os.path.join(config['SAVE_DIR'], f"config_{config['RUN_ID']}")
+            config_path = os.path.join(run_folder, 'config.json')
+            
+            with open(config_path, 'w') as f:
+                json.dump(config, f, indent=4)
+            
+            main(config, dataset, st.session_state.options)
+        
         except Exception as e:
             st.error(e)
             st.session_state.is_running = False
             st.session_state.is_trained = False
-
-
-
-
-
-
-    

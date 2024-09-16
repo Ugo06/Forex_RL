@@ -8,6 +8,44 @@ from math import log
 from utils.tools import Order
 
 class TradingEnv(Order):
+    """
+    A trading environment for simulating market conditions and agent interactions.
+    
+    Args:
+        data (np.array): Market data used to simulate the environment.
+        nb_action (int, optional): The number of actions the agent can take (e.g., buy, sell, hold). Defaults to 3.
+        window_size (int, optional): The size of the observation window (number of time steps in the state). Defaults to 20.
+        episode_size (int, optional): The number of steps in a single episode. Defaults to 250.
+        n (int, optional): Number of episodes to be executed. Defaults to 1.
+        initial_step (str or int, optional): The starting point in the dataset. Can be 'random', 'sequential', or a specific step number. Defaults to 'random'.
+        mode (dict, optional): Configuration dictionary for including additional data (e.g., price, historical position). Defaults to None.
+        wallet (int, optional): Initial amount of money in the agent's wallet. Defaults to 0.
+        reward_function (str, optional): The reward function to be used (e.g., 'default', 'portfolio', etc.). Defaults to "default".
+        zeta (float, optional): Scaling factor for reward calculations. Defaults to 1.
+        beta (float, optional): Another scaling factor used in reward functions. Defaults to 1.
+    
+    Attributes:
+        data (np.array): The market data used by the environment.
+        n (int): Number of episodes in a simulation.
+        episode_size (int): The number of steps in each episode.
+        window_size (int): Size of the observation window for the agent.
+        action_size (int): Number of possible actions the agent can take (buy, sell, hold).
+        reward_function (callable): The reward function used to evaluate the agent's actions.
+        mode (dict): Settings to include additional historical data in the state.
+        initial_step (int): The starting step in the dataset for the episode.
+        current_step (int): The current step the agent is at within the episode.
+        state_size (tuple): The size of the state the agent will receive.
+        orders (list): List of orders made by the agent.
+        position (int): Current position of the agent (0 for no position, 1 for long, -1 for short).
+        wallet (int): The agent's current wallet value.
+        historic_position (np.array): History of the agent's positions during the episode.
+        historic_action (np.array): History of the agent's actions during the episode.
+        historic_wallet (np.array): History of the wallet's values during the episode.
+        historic_orders (np.array): History of open and closed orders during the episode.
+        done (bool): Whether the episode has ended.
+        zeta (float): Scaling factor used in the reward function.
+        beta (float): Scaling factor used in the reward function.
+    """
     def __init__(self, 
                  data: np.array,
                  nb_action:int=3, 

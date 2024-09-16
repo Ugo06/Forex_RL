@@ -49,11 +49,10 @@ else:
 if config or st.session_state.is_trained:
     config = load_config(config_path)
     st.markdown("<h1 style='font-size:30px;'>Configuration used for the training</h1>", unsafe_allow_html=True)
-    st.session_state.config = config
-    st.json(st.session_state.config)
+    st.json(config)
     
     st.markdown("<h1 style='font-size:30px;'>Results</h1>")
-    run_folder = os.path.join(st.session_state.config['SAVE_DIR'], f"config_{st.session_state.config['RUN_ID']}")
+    run_folder = os.path.join(config['SAVE_DIR'], f"config_{config['RUN_ID']}")
     
     path = os.path.join(run_folder, "rolling_mean_scores_plot.png")
     st.image(path)
@@ -64,7 +63,7 @@ if config or st.session_state.is_trained:
     path = os.path.join(run_folder, "time_order_plot.png")
     st.image(path)
 
-    episode=st.slider("Numero of the backup",min_value=0,max_value=st.session_state.config["NB_EPISODE"],step=st.session_state.config["ITER_SAVE_MODEL_SCORE"])
+    episode=st.slider("Numero of the backup",min_value=0,max_value=config["NB_EPISODE"],step=config["ITER_SAVE_MODEL_SCORE"])
     if episode == 0:
         episode = 1
     path=os.path.join(run_folder,f'agent_trading_episode_{episode}.mp4')

@@ -7,6 +7,9 @@ from utils.streamlit_utils import apply_css  # Import the function
 if "is_trained" not in st.session_state:
     st.session_state.is_trained= False
 
+if "config" not in st.session_state:
+    st.session_state.config = None
+
 def load_config(config_path):
     with open(config_path, 'r') as f:
         config = json.load(f)

@@ -10,6 +10,35 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.regularizers import l2
 
 class DQNTrader:
+    """
+    A DQN-based trader that uses either an LSTM or CNN model for trading decision-making.
+    
+    Args:
+        state_size (int): The dimension of the input state (market data).
+        action_size (int): The number of possible actions the agent can take (e.g., buy, sell).
+        type (str, optional): The type of neural network model ('lstm' or 'cnn'). Defaults to 'lstm'.
+        config_layer (list, optional): The configuration of the neural network layers. Defaults to [128, 16].
+        batch_size (int, optional): The number of samples used in each training update. Defaults to 16.
+        buffer_size (int, optional): The size of the experience replay buffer. Defaults to 40000.
+        gamma (float, optional): The discount factor for future rewards. Defaults to 0.995.
+        alpha (float, optional): The learning rate for the Adam optimizer. Defaults to 1e-5.
+        espilon (float, optional): The initial exploration rate for epsilon-greedy strategy. Defaults to 1.
+        epsilon_decay (float, optional): The rate at which the exploration probability decays. Defaults to 0.95.
+        epsilon_min (float, optional): The minimum exploration rate. Defaults to 0.01.
+    
+    Attributes:
+        state_size (int): The dimension of the input state (market data).
+        action_size (int): The number of possible actions the agent can take.
+        memory (ReplayBuffer): The replay buffer to store past experiences.
+        batch_size (int): The number of samples used in each training step.
+        gamma (float): The discount factor for future rewards.
+        alpha (float): The learning rate for model optimization.
+        epsilon (float): The exploration rate for epsilon-greedy strategy.
+        epsilon_decay (float): The decay rate for reducing epsilon after each episode.
+        epsilon_min (float): The minimum epsilon value to maintain some level of exploration.
+        model (Model): The neural network model (LSTM or CNN) for action-value function approximation.
+        target_model (Model): A copy of the main model used for stable Q-learning updates.
+    """
     def __init__(self, state_size:int, 
                  action_size:int,type:float='lstm', 
                  config_layer:list=[128,16],
