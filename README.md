@@ -75,7 +75,9 @@ pip install -r requirements.txt
 This project is composed of several components, each serving a specific purpose for managing, testing, training, and running the trading algorithm based on macroeconomic indicators. Below is an explanation of the key files and directories in the project:
 
 ### **Key Files and Directories:**
-RESULTS/: This directory stores the results generated from tests, simulations, or model outputs. After running training or testing scripts, the resulting data will be stored here.
+'DATA/': This directory stores the data of the real Forex Market to train the Agent. Use 'DATA/DATASET_3/DATASET_IV.csv' to train your agent.
+
+'RESULTS/': This directory stores the results generated from tests, simulations, or model outputs. After running training or testing scripts, the resulting data will be stored here.
 
 `utils/`: This folder contains utility scripts and helper functions that are used across the project. These files are shared between different parts of the project to avoid redundancy.
 
